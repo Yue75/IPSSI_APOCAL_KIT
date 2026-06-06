@@ -119,9 +119,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Django REST Framework
 # ----------------------------------------------------------------------------
 REST_FRAMEWORK = {
+    # TokenAuthentication en premier : les requêtes du frontend (header
+    # Authorization: Token ...) sont authentifiées par token, sans contrôle
+    # CSRF. SessionAuthentication reste en second pour la navigation Swagger UI.
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
