@@ -13,6 +13,10 @@ Endpoints d'authentification (Lot 3 : email-identifiant + validation + reset).
 """
 
 import logging
+import hashlib
+import json
+
+from .models import DataRequest, get_or_create_profile
 
 from django.contrib.auth import login as django_login
 from django.contrib.auth import logout as django_logout
@@ -29,7 +33,6 @@ from rest_framework.views import APIView
 from quizzes.models import Quiz
 
 from .emails import EmailError, send_password_reset_email, send_verification_email
-from .models import get_or_create_profile
 from .serializers import (
     ChangePasswordSerializer,
     DeleteAccountSerializer,
@@ -147,6 +150,7 @@ class MeExportView(APIView):
             400: OpenApiResponse(description="Périmètre d'export invalide"),
         },
     )
+    
     def get(self, request):
         scope = (request.query_params.get("scope") or "all").strip().lower()
         if scope not in {"personal", "usage", "all"}:
@@ -156,13 +160,37 @@ class MeExportView(APIView):
             )
 
         export_payload = self._build_export_payload(request.user, scope)
+
+        audit = DataRequest.objects.create(
+            user=request.user,
+            status="processing",
+        )
+
+        export_json = json.dumps(
+            export_payload,
+            ensure_ascii=False,
+            sort_keys=True,
+        ).encode("utf-8")
+
+        audit.export_hash = hashlib.sha256(export_json).hexdigest()
+        audit.status = "completed"
+        audit.responded_at = timezone.now()
+        audit.save()
+
         timestamp = timezone.now().strftime("%Y%m%d-%H%M%S")
 
         response = JsonResponse(
             export_payload,
-            json_dumps_params={"ensure_ascii": False, "indent": 2},
+            json_dumps_params={
+                "ensure_ascii": False,
+                "indent": 2,
+            },
         )
-        return self._with_download_headers(response, f"profile-export-{scope}-{timestamp}.json")
+
+        return self._with_download_headers(
+            response,
+            f"profile-export-{scope}-{timestamp}.json",
+        )
 
     def _build_export_payload(self, user: User, scope: str) -> dict:
         profile = get_or_create_profile(user)
