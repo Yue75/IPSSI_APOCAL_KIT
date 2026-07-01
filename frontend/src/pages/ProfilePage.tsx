@@ -49,9 +49,15 @@ export default function ProfilePage() {
 
   // --- Zone RGPD : export ---
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
-  const [exportLoading, setExportLoading] = useState<'json' | 'csv' | 'zip' | null>(null);
+  const [exportLoading, setExportLoading] = useState<'personal' | 'usage' | 'all' | null>(null);
   const [exportMsg, setExportMsg] = useState<string | null>(null);
   const [exportErr, setExportErr] = useState<string | null>(null);
+
+  const exportScopes = [
+    ['personal', 'Informations personnelles'],
+    ['usage', "Données d'utilisation de l'app"],
+    ['all', 'Tout exporter'],
+  ] as const;
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent) => {
@@ -130,13 +136,13 @@ export default function ProfilePage() {
     }
   };
 
-  const handleExport = async (format: 'json' | 'csv' | 'zip') => {
+  const handleExport = async (scope: 'personal' | 'usage' | 'all') => {
     setExportErr(null);
     setExportMsg(null);
     setExportMenuOpen(false);
-    setExportLoading(format);
+    setExportLoading(scope);
     try {
-      const filename = await exportMyData(format);
+      const filename = await exportMyData(scope);
       setExportMsg(`Export téléchargé : ${filename}`);
     } catch (err) {
       setExportErr(getApiErrorMessage(err, "Export impossible pour l'instant."));
@@ -303,16 +309,16 @@ export default function ProfilePage() {
                 role="menu"
                 className="absolute left-0 top-full z-20 mt-2 w-full overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg"
               >
-                {(['json', 'csv', 'zip'] as const).map((format) => (
+                {exportScopes.map(([scope, label]) => (
                   <button
-                    key={format}
+                    key={scope}
                     type="button"
                     role="menuitem"
-                    onClick={() => handleExport(format)}
+                    onClick={() => handleExport(scope)}
                     disabled={exportLoading !== null}
                     className="w-full px-4 py-3 text-left text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-60"
                   >
-                    {format.toUpperCase()}
+                    {label}
                   </button>
                 ))}
               </div>

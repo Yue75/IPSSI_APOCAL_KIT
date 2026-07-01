@@ -116,69 +116,55 @@ def test_logout_invalidates_token(client, user):
     assert not Token.objects.filter(key=token.key).exists()
 
 
-def test_export_json(client, user, quiz):
+def test_export_all_scope(client, user, quiz):
     from rest_framework.authtoken.models import Token
 
     token = Token.objects.create(user=user)
     client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
-    response = client.get("/api/accounts/me/export/?export_format=json")
+    response = client.get("/api/accounts/me/export/?scope=all")
     assert response.status_code == 200, response.content
     assert response["Content-Type"].startswith("application/json")
     assert "attachment;" in response["Content-Disposition"]
 
     payload = response.json()
-    assert payload["user"]["email"] == "alice@test.com"
-    assert payload["profile"]["email_verified"] is False
-    assert len(payload["quizzes"]) == 1
-    assert payload["quizzes"][0]["questions"][0]["prompt"] == "Question 1 ?"
+    assert payload["scope"] == "all"
+    assert payload["personal"]["user"]["email"] == "alice@test.com"
+    assert payload["personal"]["profile"]["email_verified"] is False
+    assert len(payload["usage"]["quizzes"]) == 1
+    assert payload["usage"]["quizzes"][0]["questions"][0]["prompt"] == "Question 1 ?"
 
 
-def test_export_csv(client, user, quiz):
+def test_export_personal_scope(client, user):
     from rest_framework.authtoken.models import Token
 
     token = Token.objects.create(user=user)
     client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
-    response = client.get("/api/accounts/me/export/?export_format=csv")
+    response = client.get("/api/accounts/me/export/?scope=personal")
     assert response.status_code == 200, response.content
-    assert response["Content-Type"].startswith("text/csv")
+    payload = response.json()
+    assert payload["scope"] == "personal"
+    assert "personal" in payload
+    assert "usage" not in payload
+    assert payload["personal"]["user"]["email"] == "alice@test.com"
 
-    csv_text = response.content.decode("utf-8")
-    assert "entity,id,parent_entity,parent_id,payload_json" in csv_text
-    assert "alice@test.com" in csv_text
-    assert "Quiz de démo" in csv_text
 
-
-def test_export_zip(client, user, quiz):
-    import json
-    import zipfile
-    from io import BytesIO
-
+def test_export_usage_scope(client, user, quiz):
     from rest_framework.authtoken.models import Token
 
     token = Token.objects.create(user=user)
     client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
-    response = client.get("/api/accounts/me/export/?export_format=zip")
+    response = client.get("/api/accounts/me/export/?scope=usage")
     assert response.status_code == 200, response.content
-    assert response["Content-Type"] == "application/zip"
-
-    archive = zipfile.ZipFile(BytesIO(response.content))
-    assert set(archive.namelist()) == {
-        "manifest.json",
-        "user.json",
-        "profile.json",
-        "quizzes.json",
-        "questions.json",
-    }
-    user_data = json.loads(archive.read("user.json").decode("utf-8"))
-    quizzes_data = json.loads(archive.read("quizzes.json").decode("utf-8"))
-    assert user_data["email"] == "alice@test.com"
-    assert quizzes_data[0]["title"] == "Quiz de démo"
+    payload = response.json()
+    assert payload["scope"] == "usage"
+    assert "personal" not in payload
+    assert payload["usage"]["quizzes"][0]["title"] == "Quiz de démo"
 
 
-def test_export_rejects_invalid_format(client, user):
+def test_export_rejects_invalid_scope(client, user):
     from rest_framework.authtoken.models import Token
 
     token = Token.objects.create(user=user)
     client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
-    response = client.get("/api/accounts/me/export/?export_format=xml")
+    response = client.get("/api/accounts/me/export/?scope=xml")
     assert response.status_code == 400
