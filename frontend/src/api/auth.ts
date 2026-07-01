@@ -20,6 +20,8 @@ export type User = {
   is_staff?: boolean;
 };
 
+export type ExportFormat = 'json' | 'csv' | 'zip';
+
 type LoginResponse = { token: string; user: User };
 
 /** Connexion par email + mot de passe. Stocke le token et renvoie l'utilisateur. */
@@ -125,4 +127,29 @@ export async function deleteAccount(password: string): Promise<void> {
   // axios : le corps d'une requête DELETE se passe via la clé `data`.
   await api.delete('/accounts/profile/', { data: { password } });
   clearToken();
+}
+
+/** Exporte les données personnelles sous forme de fichier téléchargé. */
+export async function exportMyData(format: ExportFormat): Promise<string> {
+  const response = await api.get<Blob>('/accounts/me/export/', {
+    params: { export_format: format },
+    responseType: 'blob',
+  });
+  const contentDisposition = String(response.headers['content-disposition'] ?? '');
+  const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/i);
+  const filename = filenameMatch?.[1] ?? `profile-export.${format}`;
+  const contentType = response.headers['content-type'];
+  const blob = new Blob([response.data], {
+    type: typeof contentType === 'string' ? contentType : 'application/octet-stream',
+  });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.rel = 'noopener';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+  return filename;
 }
