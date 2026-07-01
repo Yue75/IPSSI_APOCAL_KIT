@@ -1,4 +1,4 @@
-# ADR-003 · Périmètre de l'export des données utilisateur
+# ADR-003-1 · Périmètre de l'export des données utilisateur
 
 ## Contexte
 
@@ -9,8 +9,8 @@ La question à trancher est le périmètre exact des données exportées. Il fau
 ## Options envisagées
 
 * Exporter uniquement les informations de profil.
-* Exporter uniquement les quiz liés au compte.
-* Exporter les informations personnelles et les quiz liés au compte.
+* Exporter uniquement les données d'utilisation de l'application.
+* Exporter les informations personnelles et les données d'utilisation de l'application.
 * Exporter l'ensemble des données techniques et applicatives du compte.
 
 ## Décision
@@ -18,14 +18,14 @@ La question à trancher est le périmètre exact des données exportées. Il fau
 Nous décidons que l'export des données utilisateur contient :
 
 * les informations personnelles du compte ;
-* les quiz rattachés à ce compte ;
-* les questions et métadonnées associées à ces quiz.
+* les données d'utilisation de l'application liées à ce compte ;
+* les quiz, cours, scores, réponses et métadonnées associées à ces quiz.
 
 ## Justification
 
 Ce périmètre correspond au besoin réel de portabilité pour l'utilisateur.
 
-Les informations personnelles permettent d'identifier le compte exporté et de conserver les données de base du profil. Les quiz constituent la production principale de l'application pour cet utilisateur, ils doivent donc être inclus dans l'export afin que celui-ci soit exploitable et réutilisable.
+Les informations personnelles permettent d'identifier le compte exporté et de conserver les données de base du profil. Les données d'utilisation de l'application constituent la production principale de l'application pour cet utilisateur, elles doivent donc être incluses dans l'export afin que celui-ci soit exploitable et réutilisable.
 
 Limiter l'export à ces éléments évite d'exposer des données internes inutiles tout en respectant l'objectif fonctionnel du bouton.
 
@@ -45,7 +45,7 @@ Limiter l'export à ces éléments évite d'exposer des données internes inutil
 ### À surveiller
 
 * Ajouter au besoin les nouveaux objets métier liés au compte dans le même cadre de décision.
-* Garder l'export cohérent entre les formats `JSON`, `CSV` et `ZIP`.
+* Garder l'export cohérent dans son unique format `JSON`.
 
 ---
 

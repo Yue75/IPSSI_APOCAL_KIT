@@ -20,7 +20,7 @@ export type User = {
   is_staff?: boolean;
 };
 
-export type ExportFormat = 'json' | 'csv' | 'zip';
+export type ExportScope = 'personal' | 'usage' | 'all';
 
 type LoginResponse = { token: string; user: User };
 
@@ -129,15 +129,15 @@ export async function deleteAccount(password: string): Promise<void> {
   clearToken();
 }
 
-/** Exporte les données personnelles sous forme de fichier téléchargé. */
-export async function exportMyData(format: ExportFormat): Promise<string> {
+/** Exporte les données utilisateur sous forme de fichier JSON téléchargé. */
+export async function exportMyData(scope: ExportScope): Promise<string> {
   const response = await api.get<Blob>('/accounts/me/export/', {
-    params: { export_format: format },
+    params: { scope },
     responseType: 'blob',
   });
   const contentDisposition = String(response.headers['content-disposition'] ?? '');
   const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/i);
-  const filename = filenameMatch?.[1] ?? `profile-export.${format}`;
+  const filename = filenameMatch?.[1] ?? `profile-export-${scope}.json`;
   const contentType = response.headers['content-type'];
   const blob = new Blob([response.data], {
     type: typeof contentType === 'string' ? contentType : 'application/octet-stream',

@@ -12,16 +12,12 @@ Endpoints d'authentification (Lot 3 : email-identifiant + validation + reset).
     POST /api/accounts/password-reset/confirm/   — définir le nouveau mot de passe
 """
 
-import csv
-import io
-import json
 import logging
-import zipfile
 
 from django.contrib.auth import login as django_login
 from django.contrib.auth import logout as django_logout
 from django.contrib.auth.models import User
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, OpenApiTypes, extend_schema
 from rest_framework import status
@@ -130,7 +126,7 @@ class MeView(APIView):
 class MeExportView(APIView):
     """Export RGPD des données du compte connecté.
 
-    GET /api/accounts/me/export/?export_format=json|csv|zip
+    GET /api/accounts/me/export/?scope=personal|usage|all
     """
 
     permission_classes = [IsAuthenticated]
@@ -138,52 +134,72 @@ class MeExportView(APIView):
     @extend_schema(
         parameters=[
             OpenApiParameter(
-                name="export_format",
+                name="scope",
                 location=OpenApiParameter.QUERY,
                 required=False,
                 type=OpenApiTypes.STR,
-                enum=["json", "csv", "zip"],
-                description="Format d'export demandé.",
+                enum=["personal", "usage", "all"],
+                description="Périmètre d'export demandé.",
             )
         ],
         responses={
             200: OpenApiTypes.BINARY,
-            400: OpenApiResponse(description="Format d'export invalide"),
+            400: OpenApiResponse(description="Périmètre d'export invalide"),
         },
     )
     def get(self, request):
-        export_format = (request.query_params.get("export_format") or "json").strip().lower()
-        if export_format not in {"json", "csv", "zip"}:
+        scope = (request.query_params.get("scope") or "all").strip().lower()
+        if scope not in {"personal", "usage", "all"}:
             return Response(
-                {"detail": "Format d'export invalide. Utilisez json, csv ou zip."},
+                {"detail": "Périmètre d'export invalide. Utilisez personal, usage ou all."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        export_payload = self._build_export_payload(request.user)
+        export_payload = self._build_export_payload(request.user, scope)
         timestamp = timezone.now().strftime("%Y%m%d-%H%M%S")
 
-        if export_format == "json":
-            response = JsonResponse(
-                export_payload,
-                json_dumps_params={"ensure_ascii": False, "indent": 2},
-            )
-            return self._with_download_headers(response, f"profile-export-{timestamp}.json")
-
-        if export_format == "csv":
-            response = HttpResponse(
-                self._build_csv(export_payload),
-                content_type="text/csv; charset=utf-8",
-            )
-            return self._with_download_headers(response, f"profile-export-{timestamp}.csv")
-
-        response = HttpResponse(
-            self._build_zip(export_payload),
-            content_type="application/zip",
+        response = JsonResponse(
+            export_payload,
+            json_dumps_params={"ensure_ascii": False, "indent": 2},
         )
-        return self._with_download_headers(response, f"profile-export-{timestamp}.zip")
+        return self._with_download_headers(response, f"profile-export-{scope}-{timestamp}.json")
 
-    def _build_export_payload(self, user: User) -> dict:
+    def _build_export_payload(self, user: User, scope: str) -> dict:
         profile = get_or_create_profile(user)
+        payload = {
+            "exported_at": timezone.now().isoformat(),
+            "scope": scope,
+        }
+
+        if scope in {"personal", "all"}:
+            payload["personal"] = {
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "date_joined": user.date_joined.isoformat() if user.date_joined else None,
+                    "last_login": user.last_login.isoformat() if user.last_login else None,
+                    "is_active": user.is_active,
+                    "is_staff": user.is_staff,
+                    "is_superuser": user.is_superuser,
+                },
+                "profile": {
+                    "id": profile.id,
+                    "email_verified": profile.email_verified,
+                    "created_at": profile.created_at.isoformat() if profile.created_at else None,
+                },
+            }
+
+        if scope in {"usage", "all"}:
+            payload["usage"] = {
+                "quizzes": self._build_quizzes(user),
+            }
+
+        return payload
+
+    def _build_quizzes(self, user: User) -> list[dict]:
         quizzes = []
 
         for quiz in Quiz.objects.filter(user=user).prefetch_related("questions"):
@@ -209,124 +225,12 @@ class MeExportView(APIView):
                 }
             )
 
-        return {
-            "exported_at": timezone.now().isoformat(),
-            "user": {
-                "id": user.id,
-                "username": user.username,
-                "email": user.email,
-                "first_name": user.first_name,
-                "last_name": user.last_name,
-                "date_joined": user.date_joined.isoformat() if user.date_joined else None,
-                "last_login": user.last_login.isoformat() if user.last_login else None,
-                "is_active": user.is_active,
-                "is_staff": user.is_staff,
-                "is_superuser": user.is_superuser,
-            },
-            "profile": {
-                "id": profile.id,
-                "email_verified": profile.email_verified,
-                "created_at": profile.created_at.isoformat() if profile.created_at else None,
-            },
-            "quizzes": quizzes,
-        }
-
-    def _build_csv(self, payload: dict) -> str:
-        buffer = io.StringIO()
-        writer = csv.writer(buffer)
-        writer.writerow(["entity", "id", "parent_entity", "parent_id", "payload_json"])
-
-        writer.writerow(
-            [
-                "user",
-                payload["user"]["id"],
-                "",
-                "",
-                json.dumps(payload["user"], ensure_ascii=False),
-            ]
-        )
-        writer.writerow(
-            [
-                "profile",
-                payload["profile"]["id"],
-                "user",
-                payload["user"]["id"],
-                json.dumps(payload["profile"], ensure_ascii=False),
-            ]
-        )
-        for quiz in payload["quizzes"]:
-            writer.writerow(
-                [
-                    "quiz",
-                    quiz["id"],
-                    "user",
-                    payload["user"]["id"],
-                    json.dumps(quiz, ensure_ascii=False),
-                ]
-            )
-            for question in quiz["questions"]:
-                writer.writerow(
-                    [
-                        "question",
-                        question["id"],
-                        "quiz",
-                        quiz["id"],
-                        json.dumps(question, ensure_ascii=False),
-                    ]
-                )
-
-        return buffer.getvalue()
+        return quizzes
 
     def _with_download_headers(self, response, filename: str):
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
         response["Access-Control-Expose-Headers"] = "Content-Disposition"
         return response
-
-    def _build_zip(self, payload: dict) -> bytes:
-        buffer = io.BytesIO()
-        with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-            archive.writestr(
-                "manifest.json",
-                json.dumps(
-                    {
-                        "exported_at": payload["exported_at"],
-                        "files": [
-                            "user.json",
-                            "profile.json",
-                            "quizzes.json",
-                            "questions.json",
-                        ],
-                    },
-                    ensure_ascii=False,
-                    indent=2,
-                ),
-            )
-            archive.writestr(
-                "user.json",
-                json.dumps(payload["user"], ensure_ascii=False, indent=2),
-            )
-            archive.writestr(
-                "profile.json",
-                json.dumps(payload["profile"], ensure_ascii=False, indent=2),
-            )
-            archive.writestr(
-                "quizzes.json",
-                json.dumps(payload["quizzes"], ensure_ascii=False, indent=2),
-            )
-            all_questions = [
-                {
-                    "quiz_id": quiz["id"],
-                    "quiz_title": quiz["title"],
-                    **question,
-                }
-                for quiz in payload["quizzes"]
-                for question in quiz["questions"]
-            ]
-            archive.writestr(
-                "questions.json",
-                json.dumps(all_questions, ensure_ascii=False, indent=2),
-            )
-        return buffer.getvalue()
 
 
 class VerifyEmailView(APIView):
