@@ -1,0 +1,10 @@
+{
+  "question": "Quelle est la durée typique d'un sprint dans Scrum ?",
+  "options": [
+    "Une semaine",
+    "Deux à quatre semaines",
+    "Un mois",
+    "Plus de deux mois"
+  ],
+  "bonne_reponse": "Deux à quatre semaines"
+}

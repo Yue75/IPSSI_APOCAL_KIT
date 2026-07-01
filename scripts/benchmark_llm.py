@@ -1,318 +1,405 @@
-﻿#!/usr/bin/env python3
-"""
-benchmark_llm.py â€” Benchmark multi-mÃ©thodes des modÃ¨les LLM (Ollama)
-Perturbation J2 Â· APOCAL'IPSSI Â· Projet EduTutor IA
+#!/usr/bin/env python3
+"""Benchmark multi-model LLM local with Ollama.
 
-ALIGNÃ‰ SUR L'ADR-002 (StratÃ©gie de benchmark)
-  DÃ©cision : tester PLUSIEURS mÃ©thodes de benchmark en phase initiale, puis en
-  retenir UNE SEULE comme rÃ©fÃ©rence pour comparer les modÃ¨les tout au long du
-  projet (comparaisons homogÃ¨nes, reproductibles, sans biais inter-mÃ©thodes).
-
-  Ce script implÃ©mente cette stratÃ©gie :
-    1. PHASE INITIALE  -> lance les 4 mÃ©thodes ci-dessous sur tous les modÃ¨les.
-    2. MÃ‰THODE DE RÃ‰F. -> une fois l'Ã©quipe dÃ©cidÃ©e, on renseigne
-       BENCHMARK_REFERENCE, et le script peut comparer n'importe quel jeu de
-       modÃ¨les avec CETTE SEULE mÃ©thode.
-
-LES 4 MÃ‰THODES DE BENCHMARK TESTÃ‰ES
-  - "latence"    : vitesse pure (p50 / p95 sur N runs). Seuil J2 : p95 <= 15 s.
-  - "qualite"    : validitÃ© structurelle du quiz gÃ©nÃ©rÃ© (JSON, 10 questions,
-                   4 options, 1 bonne rÃ©ponse valide) -> score /10 automatique.
-  - "ressources" : empreinte disque/RAM du modÃ¨le (via l'API Ollama).
-  - "composite"  : score unique /100 combinant les 3 (compromis explicite).
-
-PROTOCOLE (Ã  reporter dans l'ADR pour la reproductibilitÃ©)
-  MÃªme cours de rÃ©fÃ©rence (cours_reference.txt) Â· mÃªme machine (CPU/GPU/RAM Ã 
-  documenter) Â· mÃªme prompt Â· N runs fixÃ©s ci-dessous.
-
-PRÃ‰REQUIS
-  Ollama lancÃ© en local (http://localhost:11434) et modÃ¨les tÃ©lÃ©chargÃ©s :
-      ollama pull llama3.1:8b
-      ollama pull llama3.2:3b
-      ollama pull phi3:mini
-
-LANCEMENT
-      python scripts/benchmark_llm.py
-  RÃ©sultats Ã  l'Ã©cran ET export dans benchmark_resultats.md (Ã  committer).
+The script compares several models with the same prompt, records latency,
+structural quiz quality, disk footprint and a composite score, then writes one
+folder per model under ``scripts/migration/``.
 """
 
-import time
+from __future__ import annotations
+
 import json
-import sys
 import re
+import statistics
+import time
 import urllib.request
+from dataclasses import dataclass
+from pathlib import Path
 
-# =========================================================================
-# PARAMÃˆTRES DU PROTOCOLE
-# =========================================================================
 OLLAMA_URL_GEN = "http://localhost:11434/api/generate"
 OLLAMA_URL_TAGS = "http://localhost:11434/api/tags"
 
 MODELS = ["llama3.1:8b", "llama3.2:3b", "phi3:mini"]
-COURS_PATH = "scripts/cours_reference.txt"
-EXPORT_PATH = "scripts/benchmark_resultats.md"
+ROOT_DIR = Path(__file__).resolve().parent
+COURS_PATH = ROOT_DIR / "cours_reference.txt"
+EXPORT_PATH = ROOT_DIR / "benchmark_resultats.md"
+MIGRATION_DIR = ROOT_DIR / "migration"
 
-RUNS_LATENCE = 5          # nb de runs pour mesurer p50/p95
-RUNS_QUALITE = 2          # nb de quiz gÃ©nÃ©rÃ©s pour Ã©valuer la qualitÃ© structurelle
-SEUIL_P95 = 15            # objectif J2 : p95 <= 15 s
+RUNS_LATENCE = 5
+RUNS_QUALITE = 2
+SEUIL_P95 = 15
 
-# Poids du score composite (doivent sommer Ã  1.0)
 POIDS = {"latence": 0.40, "qualite": 0.40, "ressources": 0.20}
-
-# >>> Ã€ RENSEIGNER APRÃˆS LA PHASE INITIALE (cf. ADR-002) <<<
-# Mettez "latence" | "qualite" | "ressources" | "composite" pour figer
-# la mÃ©thode de rÃ©fÃ©rence. Laissez None pour lancer la phase initiale complÃ¨te.
 BENCHMARK_REFERENCE = "composite"
+REPO_ROOT = ROOT_DIR.parent
 
-PROMPT_TEMPLATE = """Tu es un gÃ©nÃ©rateur de quiz pÃ©dagogique.
-Ã€ partir du cours ci-dessous, gÃ©nÃ¨re EXACTEMENT 10 questions Ã  choix multiples.
-RÃ©ponds UNIQUEMENT par un tableau JSON valide, sans texte autour, au format :
+PROMPT_TEMPLATE = """Tu es un generateur de quiz pedagogique.
+A partir du cours ci-dessous, genere EXACTEMENT 10 questions a choix multiples.
+Reponds UNIQUEMENT par un tableau JSON valide, sans texte autour, au format :
 [
   {{"question": "...", "options": ["...", "...", "...", "..."], "bonne_reponse": "..."}}
 ]
-La valeur de "bonne_reponse" doit Ãªtre identique Ã  l'une des 4 options.
+La valeur de "bonne_reponse" doit etre identique a l'une des 4 options.
 
 COURS :
 {cours}
 """
 
 
-# =========================================================================
-# ACCÃˆS OLLAMA
-# =========================================================================
-def ollama_generate(model: str, prompt: str):
-    """Renvoie (texte_reponse, duree_secondes)."""
-    payload = json.dumps({"model": model, "prompt": prompt, "stream": False}).encode()
-    req = urllib.request.Request(
-        OLLAMA_URL_GEN, data=payload, headers={"Content-Type": "application/json"}
+@dataclass
+class ModelResult:
+    model: str
+    slug: str
+    p50: float | None
+    p95: float | None
+    quality_auto_10: float | None
+    disk_go: float | None
+    composite_100: float | None
+    recap_path: Path
+    quiz_path: Path
+
+
+def ollama_generate(model: str, prompt: str) -> tuple[str, float]:
+    payload = json.dumps(
+        {
+            "model": model,
+            "prompt": prompt,
+            "stream": False,
+            "options": {"temperature": 0.4},
+            "format": "json",
+        },
+        ensure_ascii=False,
+    ).encode("utf-8")
+    request = urllib.request.Request(
+        OLLAMA_URL_GEN,
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST",
     )
     start = time.perf_counter()
-    with urllib.request.urlopen(req, timeout=600) as resp:
-        data = json.loads(resp.read())
-    duree = time.perf_counter() - start
-    return data.get("response", ""), duree
+    with urllib.request.urlopen(request, timeout=600) as response:
+        data = json.loads(response.read())
+    return data.get("response", ""), time.perf_counter() - start
 
 
-def ollama_taille_go(model: str):
-    """Taille disque du modÃ¨le en Go (via /api/tags). None si introuvable."""
+def ollama_taille_go(model: str) -> float | None:
     try:
-        with urllib.request.urlopen(OLLAMA_URL_TAGS, timeout=30) as resp:
-            tags = json.loads(resp.read()).get("models", [])
-        for m in tags:
-            if m.get("name") == model or m.get("name", "").startswith(model):
-                return round(m.get("size", 0) / 1e9, 2)
+        with urllib.request.urlopen(OLLAMA_URL_TAGS, timeout=30) as response:
+            tags = json.loads(response.read()).get("models", [])
     except Exception:
         return None
+
+    for tag in tags:
+        if tag.get("name") == model or tag.get("name", "").startswith(model):
+            return round(tag.get("size", 0) / 1e9, 2)
     return None
 
 
-# =========================================================================
-# OUTILS
-# =========================================================================
-def percentile(values, p: float) -> float:
-    s = sorted(values)
-    if len(s) == 1:
-        return s[0]
-    k = (len(s) - 1) * p
-    f = int(k)
-    c = min(f + 1, len(s) - 1)
-    return s[f] + (s[c] - s[f]) * (k - f)
+def percentile(values: list[float], p: float) -> float:
+    ordered = sorted(values)
+    if len(ordered) == 1:
+        return ordered[0]
+    k = (len(ordered) - 1) * p
+    lower = int(k)
+    upper = min(lower + 1, len(ordered) - 1)
+    return ordered[lower] + (ordered[upper] - ordered[lower]) * (k - lower)
 
 
-def normaliser(valeurs: dict, plus_petit_est_mieux: bool) -> dict:
-    """Min-max -> [0,1]. 1 = meilleur. Robuste si toutes les valeurs sont Ã©gales."""
+def normaliser(valeurs: dict[str, float | None], plus_petit_est_mieux: bool) -> dict[str, float]:
     nums = [v for v in valeurs.values() if v is not None]
     if not nums:
         return {k: 0.0 for k in valeurs}
+
     lo, hi = min(nums), max(nums)
-    out = {}
-    for k, v in valeurs.items():
-        if v is None:
-            out[k] = 0.0
+    out: dict[str, float] = {}
+    for key, value in valeurs.items():
+        if value is None:
+            out[key] = 0.0
         elif hi == lo:
-            out[k] = 1.0
+            out[key] = 1.0
         else:
-            n = (v - lo) / (hi - lo)
-            out[k] = (1 - n) if plus_petit_est_mieux else n
+            scaled = (value - lo) / (hi - lo)
+            out[key] = 1.0 - scaled if plus_petit_est_mieux else scaled
     return out
 
 
-# =========================================================================
-# MÃ‰THODES DE BENCHMARK
-# =========================================================================
-def methode_latence(prompt: str) -> dict:
-    """Vitesse pure : p50 / p95 sur RUNS_LATENCE runs."""
-    res = {}
-    for model in MODELS:
-        times = []
-        for i in range(RUNS_LATENCE):
-            try:
-                _, t = ollama_generate(model, prompt)
-                times.append(t)
-                print(f"  [latence]    {model:<16} {i + 1}/{RUNS_LATENCE} : {t:5.1f}s", end="\r")
-            except Exception as e:
-                print(f"\n  âš ï¸  {model} (latence) : {e}")
-                break
-        if times:
-            res[model] = {"p50": percentile(times, 0.50), "p95": percentile(times, 0.95)}
-    print(" " * 60, end="\r")
-    return res
+def sanitize_model_name(model: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", model.lower()).strip("-")
+    return slug or "model"
 
 
-def evaluer_quiz(texte: str) -> float:
-    """Score structurel /10 d'un quiz gÃ©nÃ©rÃ© (proxy automatique de qualitÃ©)."""
-    match = re.search(r"\[.*\]", texte, re.DOTALL)
-    if not match:
-        return 0.0
+def display_path(path: Path) -> str:
     try:
-        quiz = json.loads(match.group(0))
+        return str(path.relative_to(REPO_ROOT))
+    except ValueError:
+        return str(path)
+
+
+def parse_quiz_payload(text: str):
+    stripped = text.strip()
+    if not stripped:
+        return None
+
+    try:
+        return json.loads(stripped)
     except Exception:
-        return 0.0
-    if not isinstance(quiz, list) or not quiz:
+        pass
+
+    for pattern in (r"\[[\s\S]*\]", r"\{[\s\S]*\}"):
+        match = re.search(pattern, stripped)
+        if match:
+            try:
+                return json.loads(match.group(0))
+            except Exception:
+                continue
+    return None
+
+
+def quiz_items(payload) -> list[dict]:
+    if isinstance(payload, list):
+        return [item for item in payload if isinstance(item, dict)]
+    if isinstance(payload, dict):
+        for key in ("questions", "quiz", "items"):
+            value = payload.get(key)
+            if isinstance(value, list):
+                return [item for item in value if isinstance(item, dict)]
+    return []
+
+
+def score_quiz(payload) -> float:
+    quiz = quiz_items(payload)
+    if not quiz:
         return 0.0
 
-    points, total = 0, 0
-    # critÃ¨re 1 : exactement 10 questions
-    total += 1
+    total = 4
+    points = 0.0
+
     if len(quiz) == 10:
-        points += 1
-    # critÃ¨res par question (moyennÃ©s)
-    ok_options, ok_reponse, ok_texte = 0, 0, 0
-    for q in quiz:
-        if isinstance(q, dict):
-            opts = q.get("options", [])
-            if isinstance(opts, list) and len(opts) == 4:
-                ok_options += 1
-            if q.get("bonne_reponse") in opts:
-                ok_reponse += 1
-            if str(q.get("question", "")).strip():
-                ok_texte += 1
-    n = len(quiz)
-    total += 3
-    points += (ok_options / n) + (ok_reponse / n) + (ok_texte / n)
+        points += 1.0
+
+    options_ok = 0
+    answer_ok = 0
+    text_ok = 0
+    for question in quiz:
+        options = question.get("options", [])
+        if isinstance(options, list) and len(options) == 4:
+            options_ok += 1
+        if question.get("bonne_reponse") in options:
+            answer_ok += 1
+        elif isinstance(question.get("correct_index"), int) and isinstance(options, list):
+            idx = question["correct_index"]
+            if 0 <= idx < len(options):
+                answer_ok += 1
+        if str(question.get("question", "")).strip():
+            text_ok += 1
+
+    size = len(quiz)
+    points += (options_ok / size) + (answer_ok / size) + (text_ok / size)
     return round(points / total * 10, 1)
 
 
-def methode_qualite(prompt: str) -> dict:
-    """ValiditÃ© structurelle moyenne du quiz sur RUNS_QUALITE gÃ©nÃ©rations."""
-    res = {}
-    for model in MODELS:
-        scores = []
-        for i in range(RUNS_QUALITE):
-            try:
-                texte, _ = ollama_generate(model, prompt)
-                scores.append(evaluer_quiz(texte))
-                print(f"  [qualite]    {model:<16} {i + 1}/{RUNS_QUALITE}", end="\r")
-            except Exception as e:
-                print(f"\n  âš ï¸  {model} (qualite) : {e}")
-                break
-        if scores:
-            res[model] = {"score_auto_10": round(sum(scores) / len(scores), 1)}
-    print(" " * 60, end="\r")
-    return res
+def build_prompt(cours: str) -> str:
+    return PROMPT_TEMPLATE.format(cours=cours)
 
 
-def methode_ressources() -> dict:
-    """Empreinte disque (Go) de chaque modÃ¨le."""
-    res = {}
-    for model in MODELS:
-        taille = ollama_taille_go(model)
-        if taille is not None:
-            res[model] = {"taille_go": taille}
-    return res
+def write_model_artifacts(
+    model_dir: Path,
+    payload,
+    model: str,
+    source_path: Path,
+    quality_score: float,
+    p50: float | None,
+    p95: float | None,
+    disk_go: float | None,
+    composite_100: float | None,
+) -> tuple[Path, Path]:
+    model_dir.mkdir(parents=True, exist_ok=True)
+
+    quiz_path = model_dir / "generated_quizz.json"
+    recap_path = model_dir / "recapitulatif.md"
+
+    with quiz_path.open("w", encoding="utf-8") as fh:
+        json.dump(payload, fh, ensure_ascii=False, indent=2)
+        fh.write("\n")
+
+    recap_lines = [
+        f"# Recapitulatif benchmark - {model}",
+        "",
+        f"- Cours de reference : `{display_path(source_path)}`",
+        f"- Latence p50 : {p50:.2f} s" if p50 is not None else "- Latence p50 : n/a",
+        f"- Latence p95 : {p95:.2f} s" if p95 is not None else "- Latence p95 : n/a",
+        f"- Qualite automatique : {quality_score:.1f} / 10",
+        f"- Ressources disque : {disk_go:.2f} Go" if disk_go is not None else "- Ressources disque : n/a",
+        f"- Score composite : {composite_100:.1f} / 100"
+        if composite_100 is not None
+        else "- Score composite : n/a",
+        f"- Dossier de sortie : `{display_path(model_dir)}`",
+        f"- Fichier quiz : `{quiz_path.name}`",
+    ]
+    recap_path.write_text("\n".join(recap_lines) + "\n", encoding="utf-8")
+    return recap_path, quiz_path
 
 
-def methode_composite(lat: dict, qual: dict, ress: dict) -> dict:
-    """Score unique /100 combinant latence + qualitÃ© + ressources."""
-    p95 = {m: lat.get(m, {}).get("p95") for m in MODELS}
-    qa = {m: qual.get(m, {}).get("score_auto_10") for m in MODELS}
-    go = {m: ress.get(m, {}).get("taille_go") for m in MODELS}
+def build_composite(results: list[ModelResult]) -> None:
+    p95_values = {result.model: result.p95 for result in results}
+    quality_values = {result.model: result.quality_auto_10 for result in results}
+    disk_values = {result.model: result.disk_go for result in results}
 
-    n_lat = normaliser(p95, plus_petit_est_mieux=True)
-    n_qual = normaliser(qa, plus_petit_est_mieux=False)
-    n_ress = normaliser(go, plus_petit_est_mieux=True)
+    normalized_latency = normaliser(p95_values, plus_petit_est_mieux=True)
+    normalized_quality = normaliser(quality_values, plus_petit_est_mieux=False)
+    normalized_disk = normaliser(disk_values, plus_petit_est_mieux=True)
 
-    res = {}
-    for m in MODELS:
-        score = (POIDS["latence"] * n_lat.get(m, 0)
-                 + POIDS["qualite"] * n_qual.get(m, 0)
-                 + POIDS["ressources"] * n_ress.get(m, 0)) * 100
-        res[m] = {"score_100": round(score, 1)}
-    return res
+    for result in results:
+        result.composite_100 = round(
+            (
+                POIDS["latence"] * normalized_latency.get(result.model, 0.0)
+                + POIDS["qualite"] * normalized_quality.get(result.model, 0.0)
+                + POIDS["ressources"] * normalized_disk.get(result.model, 0.0)
+            )
+            * 100,
+            1,
+        )
 
 
-# =========================================================================
-# RENDU
-# =========================================================================
-def main():
+def write_summary_file(cours_path: Path, results: list[ModelResult]) -> None:
+    lines = [
+        "# Resultats du benchmark LLM",
+        "",
+        f"- Cours de reference : `{display_path(cours_path)}`",
+        f"- Runs latence : {RUNS_LATENCE}",
+        f"- Runs qualite : {RUNS_QUALITE}",
+        f"- Seuil p95 : {SEUIL_P95} s",
+        f"- Score composite : {POIDS}",
+        f"- Benchmark de reference : `{BENCHMARK_REFERENCE}`",
+        "",
+        "## Synthese",
+        "",
+        "| Modele | p50 (s) | p95 (s) | Qualite auto /10 | Ressources (Go) | Composite /100 | Dossier |",
+        "|---|---:|---:|---:|---:|---:|---|",
+    ]
+
+    for result in results:
+        lines.append(
+            "| {model} | {p50} | {p95} | {quality} | {disk} | {composite} | `{dir}` |".format(
+                model=result.model,
+                p50=f"{result.p50:.2f}" if result.p50 is not None else "-",
+                p95=f"{result.p95:.2f}" if result.p95 is not None else "-",
+                quality=f"{result.quality_auto_10:.1f}",
+                disk=f"{result.disk_go:.2f}" if result.disk_go is not None else "-",
+                composite=f"{result.composite_100:.1f}" if result.composite_100 is not None else "-",
+                dir=f"scripts/migration/{result.slug}",
+            )
+        )
+
+    lines.extend(
+        [
+            "",
+            "## Note",
+            "",
+            "Les fichiers generes par modele sont stockes dans `scripts/migration/<modele>/`.",
+            "Chaque dossier contient `recapitulatif.md` et `generated_quizz.json`.",
+            "",
+        ]
+    )
+    EXPORT_PATH.write_text("\n".join(lines), encoding="utf-8")
+
+
+def main() -> int:
     try:
-        with open(COURS_PATH, encoding="utf-8") as f:
-            cours = f.read()
+        cours = COURS_PATH.read_text(encoding="utf-8")
     except FileNotFoundError:
-        print(f"âš ï¸  CrÃ©e d'abord '{COURS_PATH}' : un cours de test (~1 page), LE MÃŠME")
-        print("    pour tous les modÃ¨les. C'est la base reproductible du benchmark.")
-        sys.exit(1)
+        print(f"Erreur: cree d'abord {COURS_PATH}")
+        return 1
 
-    prompt = PROMPT_TEMPLATE.format(cours=cours)
-    print(f"Cours de rÃ©fÃ©rence : {COURS_PATH} ({len(cours)} caractÃ¨res)")
-    print(f"ModÃ¨les : {', '.join(MODELS)}\n")
+    prompt = build_prompt(cours)
+    results: list[ModelResult] = []
+    payloads: dict[str, object] = {}
 
-    # --- exÃ©cution des mÃ©thodes ---
-    lat = methode_latence(prompt)
-    qual = methode_qualite(prompt)
-    ress = methode_ressources()
-    comp = methode_composite(lat, qual, ress)
+    for model in MODELS:
+        latency_runs: list[float] = []
+        quality_runs: list[float] = []
+        last_payload = None
+        last_text = ""
 
-    # --- tableau rÃ©cap Ã  l'Ã©cran ---
-    print(f"\n{'ModÃ¨le':<16}{'p50':>7}{'p95':>7}{'Qual/10':>9}{'Go':>7}{'Compo/100':>11}")
-    print("-" * 57)
-    for m in MODELS:
-        p50 = lat.get(m, {}).get("p50")
-        p95 = lat.get(m, {}).get("p95")
-        qa = qual.get(m, {}).get("score_auto_10")
-        go = ress.get(m, {}).get("taille_go")
-        cp = comp.get(m, {}).get("score_100")
-        fmt = lambda v, s="{:.1f}": (s.format(v) if v is not None else "  -")
-        flag = ""
-        if p95 is not None:
-            flag = "  âœ…" if p95 <= SEUIL_P95 else "  âŒ"
-        print(f"{m:<16}{fmt(p50):>7}{fmt(p95):>7}{fmt(qa):>9}{fmt(go):>7}{fmt(cp):>11}{flag}")
+        print(f"==> Benchmark {model}")
+        for idx in range(1, RUNS_LATENCE + 1):
+            text, elapsed = ollama_generate(model, prompt)
+            last_text = text
+            latency_runs.append(elapsed)
+            print(f"    latence {idx}/{RUNS_LATENCE} : {elapsed:.2f}s")
+            if idx <= RUNS_QUALITE:
+                payload = parse_quiz_payload(text)
+                quality_runs.append(score_quiz(payload if payload is not None else text))
+                if payload is not None:
+                    last_payload = payload
 
+        if last_payload is None:
+            last_payload = parse_quiz_payload(last_text)
+        if last_payload is None:
+            last_payload = {"raw_response": last_text}
+
+        model_dir = MIGRATION_DIR / sanitize_model_name(model)
+        p50 = percentile(latency_runs, 0.50) if latency_runs else None
+        p95 = percentile(latency_runs, 0.95) if latency_runs else None
+        quality_score = round(sum(quality_runs) / len(quality_runs), 1) if quality_runs else 0.0
+        disk_go = ollama_taille_go(model)
+        payloads[model] = last_payload
+
+        temp_result = ModelResult(
+            model=model,
+            slug=sanitize_model_name(model),
+            p50=p50,
+            p95=p95,
+            quality_auto_10=quality_score,
+            disk_go=disk_go,
+            composite_100=None,
+            recap_path=model_dir / "recapitulatif.md",
+            quiz_path=model_dir / "generated_quizz.json",
+        )
+        results.append(temp_result)
+
+    build_composite(results)
+
+    for result in results:
+        recap_path, quiz_path = write_model_artifacts(
+            model_dir=MIGRATION_DIR / result.slug,
+            payload=payloads.get(result.model, {}),
+            model=result.model,
+            source_path=COURS_PATH,
+            quality_score=result.quality_auto_10 or 0.0,
+            p50=result.p50,
+            p95=result.p95,
+            disk_go=result.disk_go,
+            composite_100=result.composite_100,
+        )
+        result.recap_path = recap_path
+        result.quiz_path = quiz_path
+
+    write_summary_file(COURS_PATH, results)
+
+    print("")
+    print("| Modele | p50 (s) | p95 (s) | Qualite /10 | Go | Composite /100 | Dossier |")
+    print("|---|---:|---:|---:|---:|---:|---|")
+    for result in results:
+        print(
+            "| {model} | {p50} | {p95} | {quality} | {disk} | {composite} | {dir} |".format(
+                model=result.model,
+                p50=f"{result.p50:.2f}" if result.p50 is not None else "-",
+                p95=f"{result.p95:.2f}" if result.p95 is not None else "-",
+                quality=f"{result.quality_auto_10:.1f}",
+                disk=f"{result.disk_go:.2f}" if result.disk_go is not None else "-",
+                composite=f"{result.composite_100:.1f}" if result.composite_100 is not None else "-",
+                dir=display_path(MIGRATION_DIR / result.slug),
+            )
+        )
+
+    print("")
+    print(f"Resultats ecrits dans {EXPORT_PATH}")
+    print(f"Dossiers modeles crees sous {MIGRATION_DIR}")
     if BENCHMARK_REFERENCE:
-        print(f"\n>>> MÃ©thode de rÃ©fÃ©rence retenue (ADR-002) : '{BENCHMARK_REFERENCE}'")
-        print("    Les comparaisons ultÃ©rieures n'utiliseront QUE cette mÃ©thode.")
-    else:
-        print("\n>>> Phase initiale : 4 mÃ©thodes testÃ©es. Choisissez-en UNE comme")
-        print("    rÃ©fÃ©rence (ADR-002), puis renseignez BENCHMARK_REFERENCE en haut.")
-
-    # --- export markdown (preuve Ã  committer) ---
-    with open(EXPORT_PATH, "w", encoding="utf-8") as f:
-        f.write("# RÃ©sultats du benchmark LLM â€” Perturbation J2 (ADR-002)\n\n")
-        f.write(f"- Cours de rÃ©fÃ©rence : `{COURS_PATH}` ({len(cours)} caractÃ¨res)\n")
-        f.write(f"- Runs : latence={RUNS_LATENCE}, qualitÃ©={RUNS_QUALITE} Â· Seuil p95 â‰¤ {SEUIL_P95}s\n")
-        f.write(f"- Poids composite : {POIDS}\n")
-        f.write("- Machine : *[ Ã  complÃ©ter : CPU / GPU / RAM ]* Â· Date : *[ Ã  complÃ©ter ]*\n\n")
-        f.write("## Phase initiale â€” comparaison des mÃ©thodes\n\n")
-        f.write("| ModÃ¨le | Latence p50 (s) | Latence p95 (s) | QualitÃ© auto /10 | "
-                "QualitÃ© testeurs /5 | Ressources (Go) | Composite /100 |\n")
-        f.write("|---|---|---|---|---|---|---|\n")
-        for m in MODELS:
-            p50 = lat.get(m, {}).get("p50")
-            p95 = lat.get(m, {}).get("p95")
-            qa = qual.get(m, {}).get("score_auto_10")
-            go = ress.get(m, {}).get("taille_go")
-            cp = comp.get(m, {}).get("score_100")
-            cell = lambda v: (f"{v:.1f}" if isinstance(v, (int, float)) else "-")
-            f.write(f"| {m} | {cell(p50)} | {cell(p95)} | {cell(qa)} | *[ Ã  noter ]* | "
-                    f"{cell(go)} | {cell(cp)} |\n")
-        f.write("\n> La colonne **QualitÃ© testeurs /5** se remplit Ã  la main (â‰¥ 3 testeurs, "
-                "mÃªme cours). Le score **QualitÃ© auto /10** est un proxy structurel automatique.\n\n")
-        f.write("## MÃ©thode de rÃ©fÃ©rence retenue (ADR-002)\n\n")
-        ref = BENCHMARK_REFERENCE or "*[ Ã  choisir aprÃ¨s la phase initiale : latence / qualite / ressources / composite ]*"
-        f.write(f"MÃ©thode unique conservÃ©e pour toutes les comparaisons ultÃ©rieures : **{ref}**.\n")
-
-    print(f"\nTableau exportÃ© dans {EXPORT_PATH}.")
+        print(f"Methode de reference retenue : {BENCHMARK_REFERENCE}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
