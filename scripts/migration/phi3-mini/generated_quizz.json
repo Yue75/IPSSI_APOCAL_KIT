@@ -1,0 +1,94 @@
+{
+  "questions": [
+    {
+      "question": "Quel est le but principal d'un sprint Scrum?",
+      "options": [
+        "Fournir un produit parfait dès la première itération.",
+        "Découvrir les besoins des utilisateurs et ajuster continuellement le produit en fonction de leurs retours.",
+        "Terminer tous les tâches du Product Backlog avant le début d'un autre sprint."
+      ],
+      "bonne_reponse": "Découvrir les besoins des utilisateurs et ajuster continuellement le produit en fonction de leurs retours."
+    },
+    {
+      "question": "Quel est l'objectif d'un Minimum Viable Product (MVP) dans Scrum?",
+      "options": [
+        "Fournir une version complète et parfaite du produit dès le début.",
+        "Offrir la plus petite version du produit qui apporte de la valeur aux utilisateurs sans nécessiter tout un système complet.",
+        "Ignorer les retours des utilisateurs pour se concentrer uniquement sur l'aspect technique."
+      ],
+      "bonne_reponse": "Offrir la plus petite version du produit qui apporte de la valeur aux utilisateurs sans nécessiter tout un système complet."
+    },
+    {
+      "question": "Quelles sont les trois rôles principaux dans Scrum?",
+      "options": [
+        "Product Owner, Scrum Master et MVP.",
+        "Scrum Team, Product Manager et Directeur Technique.",
+        "Development team, Quality Assurance manager and Stakeholder."
+      ],
+      "bonne_reponse": "Product Owner, Scrum Master et Development team"
+    },
+    {
+      "question": "Quelle est la signification de 'MoSCoW' dans le contexte du Product Backlog?",
+      "options": [
+        "Un système pour organiser les réunions.",
+        "Une méthode d’évaluation des risques et priorités.",
+        "Des règles pour écrire une user story."
+      ],
+      "bonne_reponse": "Une méthode d’évaluation des risques et priorités."
+    },
+    {
+      "question": "Quel est le rôle du Scrum Master dans un projet Agile?",
+      "options": [
+        "Coder les tâches pour l'équipe.",
+        "Gérer la communication entre utilisateurs.",
+        "Aider à appliquer Scrum, faciliter l’organisation et supprimer les blocages."
+      ],
+      "bonneener_reponse": "Aider à appliquer Scrum, faciliter l’organisation et supprimer les blocages."
+    },
+    {
+      "question": "Qu'est-ce qu'un user story dans le contexte de Scrum?",
+      "options": [
+        "Une description technique détaillée d'une fonctionnalité.",
+        "Un résumé des besoins utilisateurs en termes simples et mesurables.",
+        "L’historique du développement pour une tâche spécifique."
+      ],
+      "bonreponse": "Un résumé des besoins utilisateurs en termes simples et mesurables."
+    },
+    {
+      "question": "Quelle est la signification de 'Definition of Done' dans Scrum?",
+      "options": [
+        "La date à laquelle un sprint commence.",
+        "Les critères qui définissent quand une tâche est considérée comme terminée.",
+        "Le nombre d’heures que chaque membre doit travailler pour terminer une tâche."
+      ],
+      "bonreponse": "Les critères qui définissent quand une tâche est considérée comme terminée."
+    },
+    {
+      "question": "Quelles sont les cérémonies utilisées dans Scrum?",
+      "options": [
+        "Sprint Planning, Daily Stand-up and Sprint Review.",
+        "Product Backlog prioritization, Weekly Meeting et Monthly Retrospective.",
+        "Daily Coding Session, Biweekly Progress Checks & Quarterly Presentations."
+      ],
+      "bonreponse": "Sprint Planning, Daily Stand-up and Sprint Review."
+    },
+    {
+      "question": "Comment une équipe Scrum peut-elle gérer les perturbations pendant un sprint?",
+      "options": [
+        "Reporter l’ensemble du travail jusqu'à ce que la perturbation disparaisse.",
+        "Ignorer complètement toute perturbation pour maintenir le calendrier.",
+        "Mesurer l'impact, réévaluer les priorités et documenter ses décisions."
+      ],
+      "bonreponse": "Mesurer l'impact, réévaluer les priorités et documenter ses décisions."
+    },
+    {
+      "question": "Quels éléments sont inclus dans un MVP pour une application de révision comme EduTutor IA?",
+      "options": [
+        "L'inscription, l'import d’un cours et la génération d'un quiz.",
+        "La création complète du produit avec toutes les fonctionnalités supplémentaires.",
+        "Le développement complet des tests unitaires avant le début de tout travail."
+      ],
+      "bonreponse": "L'inscription, l'import d’un cours et la génération d'un quiz."
+    }
+  ]
+}
