@@ -11,9 +11,9 @@
 
 | Modele | p50 (s) | p95 (s) | Qualite auto /10 | Ressources (Go) | Composite /100 | Dossier |
 |---|---:|---:|---:|---:|---:|---|
-| llama3.1:8b | 13.09 | 42.42 | 0.0 | 4.92 | 29.1 | `scripts/migration/llama3-1-8b` |
-| llama3.2:3b | 4.87 | 15.18 | 0.0 | 2.02 | 60.0 | `scripts/migration/llama3-2-3b` |
-| phi3:mini | 92.77 | 115.02 | 5.4 | 2.18 | 58.9 | `scripts/migration/phi3-mini` |
+| llama3.1:8b | 113.20 | 130.51 | 10.0 | 4.92 | 40.0 | `scripts/migration/llama3-1-8b` |
+| llama3.2:3b | 61.01 | 73.63 | 7.5 | 2.02 | 60.0 | `scripts/migration/llama3-2-3b` |
+| phi3:mini | 98.30 | 107.79 | 8.8 | 2.18 | 55.7 | `scripts/migration/phi3-mini` |
 
 ## Note
 
