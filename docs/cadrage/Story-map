@@ -1,0 +1,70 @@
+Story Map — EduTutor IA (MAJ après J1 + J3/J3-bis)
+Backbone / Parcours utilisateur
+Parcours Étudiant:
+1-Authentification
+2-Import du cours
+3-Génération du quiz
+4-Réalisation du quiz
+5-Résultats et correction
+6-Suivi de progression
+Parcours Enseignant (Mme Lefèvre):
+7-Suivi de classe
+8-Détection des étudiants en difficulté
+9-Accompagnement pédagogique
+Parcours Sécurité & Conformité:
+10-Protection IA
+11-Gestion des données personnelles
+⸻
+MUST (Release 1)
+Étudiant:
+-Créer un compte / se connecter
+-Réinitialiser mot de passe
+-Upload PDF ≤ 5 Mo ou texte ≥ 200 caractères
+-Générer automatiquement 10 QCM via IA
+-Répondre au quiz
+Voir score /10 avec correction
+-Consulter l’historique des quiz
+Sécurité (J3):
+-Séparer System Prompt et User Input
+-Détecter les prompts malveillants
+-Bloquer contenu suspect
+-Valider le format des quiz générés
+RGPD (J3-bis):
+-Afficher les mentions légales
+-Permettre suppression du compte
+-Supprimer les données personnelles associées
+⸻
+SHOULD
+Enseignant (J1):
+-Voir les scores des étudiants
+-Suivre leur progression
+-Identifier rapidement les décrocheurs
+-Repérer les baisses de performance
+RGPD:
+-Export des données utilisateur (SAR)
+-Consultation de l’historique des demandes RGPD
+⸻
+COULD (Release 2)
+Améliorations produit:
+-Dashboard avancé
+Mode examen / Timer
+-OCR documents scannés
+-Difficulté configurable
+Enseignant:
+-Analytics de classe
+-Conseils personnalisés aux étudiants
+Sécurité avancée:
+-Monitoring des attaques
+-Alertes automatiques admin
+-Détection avancée de jailbreak LLM
+⸻
+Impact des perturbations
+J1 — Nouvelle persona : Mme Lefèvre
+Ajout d’un parcours enseignant centré sur :
+-suivi des scores
+-détection des décrocheurs
+-accompagnement pédagogique
+J3 — Prompt Injection:
+Ajout des fonctionnalités de sécurité pour protéger le LLM contre les attaques.
+J3-bis — RGPD:
+Ajout des fonctionnalités de conformité liées à la protection, l’export et la suppression des données.
