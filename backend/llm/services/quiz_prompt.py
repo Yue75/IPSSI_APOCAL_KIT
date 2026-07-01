@@ -108,7 +108,7 @@ def parse_and_validate_quiz(raw: str) -> list[dict]:
         match = re.search(r"\{[\s\S]*\}", raw)
 
         if not match:
-            raise LLMError("Aucun JSON trouvé dans la réponse.")
+           raise LLMError("Aucun JSON trouvé dans la réponse.") from None
 
         try:
             data = json.loads(match.group(0))

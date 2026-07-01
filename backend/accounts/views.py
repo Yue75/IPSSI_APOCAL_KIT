@@ -12,11 +12,9 @@ Endpoints d'authentification (Lot 3 : email-identifiant + validation + reset).
     POST /api/accounts/password-reset/confirm/   — définir le nouveau mot de passe
 """
 
-import logging
 import hashlib
 import json
-
-from .models import DataRequest, get_or_create_profile
+import logging
 
 from django.contrib.auth import login as django_login
 from django.contrib.auth import logout as django_logout
@@ -33,6 +31,7 @@ from rest_framework.views import APIView
 from quizzes.models import Quiz
 
 from .emails import EmailError, send_password_reset_email, send_verification_email
+from .models import DataRequest, get_or_create_profile
 from .serializers import (
     ChangePasswordSerializer,
     DeleteAccountSerializer,
@@ -150,7 +149,7 @@ class MeExportView(APIView):
             400: OpenApiResponse(description="Périmètre d'export invalide"),
         },
     )
-    
+
     def get(self, request):
         scope = (request.query_params.get("scope") or "all").strip().lower()
         if scope not in {"personal", "usage", "all"}:
