@@ -1,0 +1,9 @@
+{
+  "question1": "Quel est le nom du rôle principal qui représente les besoins des utilisateurs et définit les priorités du produit ?",
+  "options": [
+    "Scrum Master",
+    "Product Owner",
+    "Équipe de développement"
+  ],
+  "bonne_reponse": "Product Owner"
+}

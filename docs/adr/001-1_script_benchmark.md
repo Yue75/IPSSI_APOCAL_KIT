@@ -1,4 +1,4 @@
-# ADR-002 · Stratégie de benchmark pour le choix du modèle LLM
+# ADR-001-1 · Stratégie de benchmark pour le choix du modèle LLM
 
 - **Date :** 30/06/2026
 - **Statut :** Accepté

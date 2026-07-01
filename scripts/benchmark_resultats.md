@@ -1,25 +1,21 @@
-# RÃ©sultats du benchmark LLM â€” Perturbation J2 (ADR-002)
+# Resultats du benchmark LLM
 
-- Cours de rÃ©fÃ©rence : `scripts/cours_reference.txt` (4625 caractÃ¨res)
-- Runs : latence=5, qualitÃ©=2 Â· Seuil p95 â‰¤ 15s
-- Poids composite : {'latence': 0.4, 'qualite': 0.4, 'ressources': 0.2}
-- Machine : *[ Ã  complÃ©ter : CPU / GPU / RAM ]* Â· Date : *[ Ã  complÃ©ter ]*
+- Cours de reference : `scripts/cours_reference.txt`
+- Runs latence : 5
+- Runs qualite : 2
+- Seuil p95 : 15 s
+- Score composite : {'latence': 0.4, 'qualite': 0.4, 'ressources': 0.2}
+- Benchmark de reference : `composite`
 
-## Phase initiale â€” comparaison des mÃ©thodes
+## Synthese
 
-| ModÃ¨le | Latence p50 (s) | Latence p95 (s) | QualitÃ© auto /10 | QualitÃ© testeurs /5 | Ressources (Go) | Composite /100 |
-|---|---|---|---|---|---|---|
-| llama3.1:8b | - | - | - | *[ Ã  noter ]* | 4.9 | 0.0 |
-| llama3.2:3b | - | - | 8.3 | *[ Ã  noter ]* | 2.0 | 60.0 |
-| phi3:mini | - | - | - | *[ Ã  noter ]* | 2.2 | 18.9 |
-## Observation d'exécution
+| Modele | p50 (s) | p95 (s) | Qualite auto /10 | Ressources (Go) | Composite /100 | Dossier |
+|---|---:|---:|---:|---:|---:|---|
+| llama3.1:8b | 13.09 | 42.42 | 0.0 | 4.92 | 29.1 | `scripts/migration/llama3-1-8b` |
+| llama3.2:3b | 4.87 | 15.18 | 0.0 | 2.02 | 60.0 | `scripts/migration/llama3-2-3b` |
+| phi3:mini | 92.77 | 115.02 | 5.4 | 2.18 | 58.9 | `scripts/migration/phi3-mini` |
 
-Les mesures de latence p50/p95 n'ont pas abouti sur cette machine pour les trois modèles à cause de timeouts.  
-Le seul modèle ayant produit un résultat de qualité exploitable est `llama3.2:3b` avec une qualité automatique de 8.3/10 et un score composite de 60.0/100.
+## Note
 
-Décision provisoire : retenir `llama3.2:3b` comme candidat prioritaire, car il est plus léger que `llama3.1:8b` et a produit le meilleur résultat exploitable dans l'environnement local.
-> La colonne **QualitÃ© testeurs /5** se remplit Ã  la main (â‰¥ 3 testeurs, mÃªme cours). Le score **QualitÃ© auto /10** est un proxy structurel automatique.
-
-## MÃ©thode de rÃ©fÃ©rence retenue (ADR-002)
-
-MÃ©thode unique conservÃ©e pour toutes les comparaisons ultÃ©rieures : **composite**.
+Les fichiers generes par modele sont stockes dans `scripts/migration/<modele>/`.
+Chaque dossier contient `recapitulatif.md` et `generated_quizz.json`.

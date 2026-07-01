@@ -1,4 +1,4 @@
-# ADR-002 · Choix du modèle LLM pour la génération de quiz
+# ADR-004-1 · Choix du modèle LLM pour la génération de quiz
 
 ## Contexte
 
