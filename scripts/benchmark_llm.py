@@ -37,9 +37,18 @@ PROMPT_TEMPLATE = """Tu es un generateur de quiz pedagogique.
 A partir du cours ci-dessous, genere EXACTEMENT 10 questions a choix multiples.
 Reponds UNIQUEMENT par un tableau JSON valide, sans texte autour, au format :
 [
-  {{"question": "...", "options": ["...", "...", "...", "..."], "bonne_reponse": "..."}}
+  {{
+    "title": "...",
+    "source_text": "...",
+    "questions": [
+      {{"prompt": "...", "options": ["...", "...", "...", "..."], "correct_index": 0}}
+    ]
+  }}
 ]
-La valeur de "bonne_reponse" doit etre identique a l'une des 4 options.
+La liste JSON doit contenir un seul objet.
+Le champ "questions" doit contenir exactement 10 questions.
+Chaque question doit avoir exactement 4 options.
+Le champ "correct_index" doit etre un entier entre 0 et 3.
 
 COURS :
 {cours}
@@ -155,46 +164,105 @@ def parse_quiz_payload(text: str):
     return None
 
 
-def quiz_items(payload) -> list[dict]:
+def _quiz_from_payload(payload):
     if isinstance(payload, list):
-        return [item for item in payload if isinstance(item, dict)]
+        for item in payload:
+            if isinstance(item, dict):
+                return item
+        return None
     if isinstance(payload, dict):
-        for key in ("questions", "quiz", "items"):
-            value = payload.get(key)
-            if isinstance(value, list):
-                return [item for item in value if isinstance(item, dict)]
-    return []
+        return payload
+    return None
+
+
+def _question_items(payload) -> list[dict]:
+    quiz = _quiz_from_payload(payload)
+    if not quiz:
+        return []
+    questions = quiz.get("questions", [])
+    if not isinstance(questions, list):
+        return []
+    return [item for item in questions if isinstance(item, dict)]
+
+
+def _normalize_question(question: dict) -> dict:
+    options = question.get("options", [])
+    if not isinstance(options, list):
+        options = []
+    normalized_options = [str(option) for option in options[:4]]
+    while len(normalized_options) < 4:
+        normalized_options.append("")
+
+    correct_index = question.get("correct_index")
+    if not isinstance(correct_index, int) or not 0 <= correct_index <= 3:
+        correct_index = 0
+
+    return {
+        "prompt": str(question.get("prompt") or question.get("question") or "").strip(),
+        "options": normalized_options,
+        "correct_index": correct_index,
+    }
+
+
+def normalize_quiz_payload(payload, *, model: str, source_text: str) -> list[dict]:
+    quiz = _quiz_from_payload(payload) or {}
+    raw_questions = quiz.get("questions", [])
+    if not isinstance(raw_questions, list):
+        raw_questions = []
+
+    normalized_questions = [
+        _normalize_question(question)
+        for question in raw_questions
+        if isinstance(question, dict)
+    ]
+
+    if not normalized_questions and isinstance(payload, list):
+        normalized_questions = [
+            _normalize_question(question)
+            for question in payload
+            if isinstance(question, dict)
+        ]
+
+    title = str(quiz.get("title") or f"Benchmark LLM - {model}")
+    source = str(quiz.get("source_text") or source_text)
+
+    return [
+        {
+            "title": title,
+            "source_text": source,
+            "questions": normalized_questions[:10],
+        }
+    ]
 
 
 def score_quiz(payload) -> float:
-    quiz = quiz_items(payload)
+    quiz = _quiz_from_payload(payload)
     if not quiz:
         return 0.0
 
     total = 4
     points = 0.0
 
-    if len(quiz) == 10:
+    if str(quiz.get("title", "")).strip():
         points += 1.0
 
-    options_ok = 0
-    answer_ok = 0
-    text_ok = 0
-    for question in quiz:
-        options = question.get("options", [])
-        if isinstance(options, list) and len(options) == 4:
-            options_ok += 1
-        if question.get("bonne_reponse") in options:
-            answer_ok += 1
-        elif isinstance(question.get("correct_index"), int) and isinstance(options, list):
-            idx = question["correct_index"]
-            if 0 <= idx < len(options):
-                answer_ok += 1
-        if str(question.get("question", "")).strip():
-            text_ok += 1
+    if str(quiz.get("source_text", "")).strip():
+        points += 1.0
 
-    size = len(quiz)
-    points += (options_ok / size) + (answer_ok / size) + (text_ok / size)
+    questions = _question_items(payload)
+    if len(questions) == 10:
+        points += 1.0
+
+    structure_ok = 0
+    for question in questions:
+        normalized = _normalize_question(question)
+        options = normalized["options"]
+        if normalized["prompt"] and len(options) == 4 and 0 <= normalized["correct_index"] <= 3:
+            structure_ok += 1
+
+    if questions:
+        points += structure_ok / len(questions)
+
     return round(points / total * 10, 1)
 
 
@@ -207,6 +275,7 @@ def write_model_artifacts(
     payload,
     model: str,
     source_path: Path,
+    source_text: str,
     quality_score: float,
     p50: float | None,
     p95: float | None,
@@ -217,9 +286,10 @@ def write_model_artifacts(
 
     quiz_path = model_dir / "generated_quizz.json"
     recap_path = model_dir / "recapitulatif.md"
+    normalized_payload = normalize_quiz_payload(payload, model=model, source_text=source_text)
 
     with quiz_path.open("w", encoding="utf-8") as fh:
-        json.dump(payload, fh, ensure_ascii=False, indent=2)
+        json.dump(normalized_payload, fh, ensure_ascii=False, indent=2)
         fh.write("\n")
 
     recap_lines = [
@@ -366,6 +436,7 @@ def main() -> int:
             payload=payloads.get(result.model, {}),
             model=result.model,
             source_path=COURS_PATH,
+            source_text=cours,
             quality_score=result.quality_auto_10 or 0.0,
             p50=result.p50,
             p95=result.p95,

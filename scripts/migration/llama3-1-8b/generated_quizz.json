@@ -1,10 +1,108 @@
-{
-  "question": "Quelle est la durée typique d'un sprint dans Scrum ?",
-  "options": [
-    "Une semaine",
-    "Deux à quatre semaines",
-    "Un mois",
-    "Plus de deux mois"
-  ],
-  "bonne_reponse": "Deux à quatre semaines"
-}
+[
+  {
+    "title": "Introduction à Scrum",
+    "source_text": "Cours de référence — Introduction à Scrum et à la gestion de projet Agile",
+    "questions": [
+      {
+        "prompt": "Quelle est la principale différence entre une méthode classique de gestion de projet et Scrum ?",
+        "options": [
+          "Scrum prévoit les besoins au début du projet",
+          "Scrum accepte que les besoins changent pendant le projet",
+          "Scrum ne prend pas en compte les retours des utilisateurs",
+          ""
+        ],
+        "correct_index": 1
+      },
+      {
+        "prompt": "Quelle est la durée typique d'un sprint dans Scrum ?",
+        "options": [
+          "Entre une et quatre semaines",
+          "Entre cinq et huit semaines",
+          "Entre neuf et douze semaines",
+          ""
+        ],
+        "correct_index": 0
+      },
+      {
+        "prompt": "Quel est le rôle du Product Owner dans Scrum ?",
+        "options": [
+          "Il représente les besoins des utilisateurs et définit les priorités du produit",
+          "Il aide l'équipe à appliquer Scrum",
+          "Il réalise concrètement le produit",
+          ""
+        ],
+        "correct_index": 0
+      },
+      {
+        "prompt": "Qu'est-ce qu'une user story dans Scrum ?",
+        "options": [
+          "Une description détaillée d'un besoin utilisateur",
+          "Une description simple d'un besoin utilisateur",
+          "Un plan de travail pour l'équipe",
+          ""
+        ],
+        "correct_index": 1
+      },
+      {
+        "prompt": "Quelle est la méthode utilisée pour classer les priorités dans Scrum ?",
+        "options": [
+          "MoSCoW : Must have, Should have, Could have et Won't have",
+          "MoSCoW : Must have, Should have, Won't have et Could have",
+          "MoSCoW : Could have, Should have, Must have et Won't have",
+          ""
+        ],
+        "correct_index": 0
+      },
+      {
+        "prompt": "Qu'est-ce que le MVP dans Scrum ?",
+        "options": [
+          "La plus petite version du produit qui apporte une vraie valeur à l'utilisateur",
+          "La version finale du produit",
+          "La version minimale du produit",
+          ""
+        ],
+        "correct_index": 0
+      },
+      {
+        "prompt": "Quelle est la cérémonie de Scrum qui permet de présenter le travail réalisé aux parties prenantes ?",
+        "options": [
+          "Le Sprint Planning",
+          "La Sprint Review",
+          "La rétrospective",
+          ""
+        ],
+        "correct_index": 1
+      },
+      {
+        "prompt": "Qu'est-ce que la Definition of Done dans Scrum ?",
+        "options": [
+          "Une règle partagée qui indique quand une tâche est réellement terminée",
+          "Une règle partagée qui indique quand une tâche peut être commencée",
+          "Une règle partagée qui indique quand une tâche doit être abandonnée",
+          ""
+        ],
+        "correct_index": 0
+      },
+      {
+        "prompt": "Quelle est la qualité d'un projet Scrum ?",
+        "options": [
+          "Elle dépend uniquement du code produit",
+          "Elle dépend de la capacité de l'équipe à communiquer, à prioriser, à mesurer les risques, à documenter ses décisions et à livrer régulièrement",
+          "",
+          ""
+        ],
+        "correct_index": 1
+      },
+      {
+        "prompt": "Qu'est-ce que Scrum encourage ?",
+        "options": [
+          "L'amélioration continue",
+          "La répétition des mêmes erreurs",
+          "Le non-respect des règles de la méthode",
+          ""
+        ],
+        "correct_index": 0
+      }
+    ]
+  }
+]

@@ -1,94 +1,98 @@
-{
-  "questions": [
-    {
-      "question": "Quel est le but principal d'un sprint Scrum?",
-      "options": [
-        "Fournir un produit parfait dès la première itération.",
-        "Découvrir les besoins des utilisateurs et ajuster continuellement le produit en fonction de leurs retours.",
-        "Terminer tous les tâches du Product Backlog avant le début d'un autre sprint."
-      ],
-      "bonne_reponse": "Découvrir les besoins des utilisateurs et ajuster continuellement le produit en fonction de leurs retours."
-    },
-    {
-      "question": "Quel est l'objectif d'un Minimum Viable Product (MVP) dans Scrum?",
-      "options": [
-        "Fournir une version complète et parfaite du produit dès le début.",
-        "Offrir la plus petite version du produit qui apporte de la valeur aux utilisateurs sans nécessiter tout un système complet.",
-        "Ignorer les retours des utilisateurs pour se concentrer uniquement sur l'aspect technique."
-      ],
-      "bonne_reponse": "Offrir la plus petite version du produit qui apporte de la valeur aux utilisateurs sans nécessiter tout un système complet."
-    },
-    {
-      "question": "Quelles sont les trois rôles principaux dans Scrum?",
-      "options": [
-        "Product Owner, Scrum Master et MVP.",
-        "Scrum Team, Product Manager et Directeur Technique.",
-        "Development team, Quality Assurance manager and Stakeholder."
-      ],
-      "bonne_reponse": "Product Owner, Scrum Master et Development team"
-    },
-    {
-      "question": "Quelle est la signification de 'MoSCoW' dans le contexte du Product Backlog?",
-      "options": [
-        "Un système pour organiser les réunions.",
-        "Une méthode d’évaluation des risques et priorités.",
-        "Des règles pour écrire une user story."
-      ],
-      "bonne_reponse": "Une méthode d’évaluation des risques et priorités."
-    },
-    {
-      "question": "Quel est le rôle du Scrum Master dans un projet Agile?",
-      "options": [
-        "Coder les tâches pour l'équipe.",
-        "Gérer la communication entre utilisateurs.",
-        "Aider à appliquer Scrum, faciliter l’organisation et supprimer les blocages."
-      ],
-      "bonneener_reponse": "Aider à appliquer Scrum, faciliter l’organisation et supprimer les blocages."
-    },
-    {
-      "question": "Qu'est-ce qu'un user story dans le contexte de Scrum?",
-      "options": [
-        "Une description technique détaillée d'une fonctionnalité.",
-        "Un résumé des besoins utilisateurs en termes simples et mesurables.",
-        "L’historique du développement pour une tâche spécifique."
-      ],
-      "bonreponse": "Un résumé des besoins utilisateurs en termes simples et mesurables."
-    },
-    {
-      "question": "Quelle est la signification de 'Definition of Done' dans Scrum?",
-      "options": [
-        "La date à laquelle un sprint commence.",
-        "Les critères qui définissent quand une tâche est considérée comme terminée.",
-        "Le nombre d’heures que chaque membre doit travailler pour terminer une tâche."
-      ],
-      "bonreponse": "Les critères qui définissent quand une tâche est considérée comme terminée."
-    },
-    {
-      "question": "Quelles sont les cérémonies utilisées dans Scrum?",
-      "options": [
-        "Sprint Planning, Daily Stand-up and Sprint Review.",
-        "Product Backlog prioritization, Weekly Meeting et Monthly Retrospective.",
-        "Daily Coding Session, Biweekly Progress Checks & Quarterly Presentations."
-      ],
-      "bonreponse": "Sprint Planning, Daily Stand-up and Sprint Review."
-    },
-    {
-      "question": "Comment une équipe Scrum peut-elle gérer les perturbations pendant un sprint?",
-      "options": [
-        "Reporter l’ensemble du travail jusqu'à ce que la perturbation disparaisse.",
-        "Ignorer complètement toute perturbation pour maintenir le calendrier.",
-        "Mesurer l'impact, réévaluer les priorités et documenter ses décisions."
-      ],
-      "bonreponse": "Mesurer l'impact, réévaluer les priorités et documenter ses décisions."
-    },
-    {
-      "question": "Quels éléments sont inclus dans un MVP pour une application de révision comme EduTutor IA?",
-      "options": [
-        "L'inscription, l'import d’un cours et la génération d'un quiz.",
-        "La création complète du produit avec toutes les fonctionnalités supplémentaires.",
-        "Le développement complet des tests unitaires avant le début de tout travail."
-      ],
-      "bonreponse": "L'inscription, l'import d’un cours et la génération d'un quiz."
-    }
-  ]
-}
+[
+  {
+    "title": "Quiz sur le Scrum",
+    "source_text": "Cours de référence — Introduction à Scrum et à la gestion de projet Agile",
+    "questions": [
+      {
+        "prompt": "Que représente un Product Owner dans une équipe Scrum?",
+        "options": [
+          "Un membre du développement technique",
+          "La personne qui gère le budget",
+          "L'individu représentant les besoins des utilisateurs et défini les priorités",
+          "Le chef d'équipe"
+        ],
+        "correct_index": 2
+      },
+      {
+        "prompt": "Quel est l’objectif principal du Scrum?",
+        "options": [
+          "Fournir une solution parfaite au premier essai",
+          "Créer un produit avec les fonctionnalités demandées rapidement et continuellement amélioré grâce aux retours des utilisateurs",
+          "Éliminer complètement le besoin de planification dans la gestion du projet",
+          "Assurer que chaque sprint dure exactement une semaine"
+        ],
+        "correct_index": 1
+      },
+      {
+        "prompt": "Qu'est-ce qu'une user story?",
+        "options": [
+          "Une révision des fonctionnalités du produit par l’équipe de développement",
+          "Un besoin utilisateur décrit simplement pour la réalisation d'un produit ou une partie de celui-ci",
+          "La documentation technique détaillée nécessaire à un projet Scrum.",
+          "Le budget alloué au sprint"
+        ],
+        "correct_index": 2
+      },
+      {
+        "prompt": "Quelle est la différence entre le Product Backlog et les user stories?",
+        "options": [
+          "Les backlogs sont des objectifs à atteindre tandis que les user stories sont simplement des descriptions.",
+          "Le product backlog contient uniquement les priorités, pas de fonctionnalités spécifiques.",
+          "Une bonne user story doit être claire et testable, alors qu'un produit peut contenir plusieurs utilisateurs avec des besoins différents.",
+          ""
+        ],
+        "correct_index": 3
+      },
+      {
+        "prompt": "Quelle est la signification de 'Minimum Viable Product' (MVP) dans Scrum?",
+        "options": [
+          "La version finale du produit qui répond à tous les besoins des utilisateurs.",
+          "Le minimum nécessaire pour tester rapidement et améliorer le produit avec l'aide des retours d'utilisateurs.",
+          "Une copie complète de la fonctionnalité désirée par un client.",
+          "Un prototype non fini qui doit être perfectionné avant livraison."
+        ],
+        "correct_index": 2
+      },
+      {
+        "prompt": "Quelle est l'importance des cérémonies Scrum?",
+        "options": [
+          "Ces cérémonies sont facultatives et peuvent être omises si nécessaire.",
+          "Les cérémonies aident à rester concentré sur la valeur, même en cas de perturbations.",
+          "Tout le monde doit participer aux cérémonies pour que Scrum soit efficace.",
+          ""
+        ],
+        "correct_index": 1
+      },
+      {
+        "prompt": "Quelle est une bonne Definition of Done?",
+        "options": [
+          "Une fonctionnalité a été codée et testée.",
+          "Tout travail doit être terminé avant le début du sprint pour éviter les retards.",
+          "Le produit final ne nécessite pas de tests ou d'intégration dans la branche principale.",
+          "Un ensemble clair de critères qui indique quand une tâche est considérée comme complètement terminée."
+        ],
+        "correct_index": 0
+      },
+      {
+        "prompt": "Quelles sont les preuves concrètes d'une organisation efficace dans un environnement Scrum?",
+        "options": [
+          "Les commits Git réguliers et validés par des Pull Requests.",
+          "La production de code sans tests ou documentation pour accélérer le développement.",
+          "Le fait que l'équipe ne discute jamais ses décisions pour éviter les retards.",
+          "L’absence d’issues GitHub, artefacts de cadrage et démonstrations."
+        ],
+        "correct_index": 1
+      },
+      {
+        "prompt": "Comment une équipe Scrum peut-elle transformer un imprévu en apprentissage?",
+        "options": [
+          "En ignorant l'imprévu et continuant comme si rien ne s’était passé.",
+          "En se demandant ce qui a mal tourné, quoi a fonctionné bien, les obstacles rencontrés et quelles actions mettre en place.",
+          "En reprenant le travail du projet précédent pour éviter de perdre temps.",
+          ""
+        ],
+        "correct_index": 2
+      }
+    ]
+  }
+]
