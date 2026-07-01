@@ -108,7 +108,7 @@ def parse_and_validate_quiz(raw: str) -> list[dict]:
         match = re.search(r"\{[\s\S]*\}", raw)
 
         if not match:
-           raise LLMError("Aucun JSON trouvé dans la réponse.") from None
+            raise LLMError("Aucun JSON trouvé dans la réponse.") from None
 
         try:
             data = json.loads(match.group(0))
@@ -127,9 +127,7 @@ def parse_and_validate_quiz(raw: str) -> list[dict]:
         raise LLMError("'questions' doit être une liste.")
 
     if len(questions) != 10:
-        raise LLMError(
-            f"Le modèle a généré {len(questions)} questions au lieu de 10."
-        )
+        raise LLMError(f"Le modèle a généré {len(questions)} questions au lieu de 10.")
 
     prompts = set()
 
@@ -156,22 +154,16 @@ def parse_and_validate_quiz(raw: str) -> list[dict]:
             raise LLMError(f"Question {index} : options invalides.")
 
         if len(options) != 4:
-            raise LLMError(
-                f"Question {index} : exactement 4 réponses attendues."
-            )
+            raise LLMError(f"Question {index} : exactement 4 réponses attendues.")
 
         if len(set(options)) != 4:
-            raise LLMError(
-                f"Question {index} : réponses dupliquées."
-            )
+            raise LLMError(f"Question {index} : réponses dupliquées.")
 
         if not all(isinstance(option, str) and option.strip() for option in options):
             raise LLMError(f"Question {index} : option vide.")
 
         if correct_index not in [0, 1, 2, 3]:
-            raise LLMError(
-                f"Question {index} : correct_index invalide."
-            )
+            raise LLMError(f"Question {index} : correct_index invalide.")
 
         cleaned.append(
             {

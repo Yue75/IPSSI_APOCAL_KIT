@@ -43,6 +43,7 @@ def get_or_create_profile(user) -> Profile:
     profile, _ = Profile.objects.get_or_create(user=user)
     return profile
 
+
 class DataRequest(models.Model):
     """Trace les demandes d'export des données personnelles (SAR - RGPD)."""
 

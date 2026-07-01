@@ -149,7 +149,6 @@ class MeExportView(APIView):
             400: OpenApiResponse(description="Périmètre d'export invalide"),
         },
     )
-
     def get(self, request):
         scope = (request.query_params.get("scope") or "all").strip().lower()
         if scope not in {"personal", "usage", "all"}:

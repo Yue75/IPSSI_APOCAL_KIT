@@ -24,9 +24,7 @@ class DataRequestAdmin(admin.ModelAdmin):
         "requested_at",
         "responded_at",
     )
-    list_filter = (
-        "status",
-    )
+    list_filter = ("status",)
     search_fields = (
         "user__email",
         "user__username",
