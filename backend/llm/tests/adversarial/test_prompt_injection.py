@@ -41,7 +41,6 @@ from rest_framework.test import APIClient
 from llm.services.base import LLMError
 from llm.services.quiz_prompt import parse_and_validate_quiz
 
-
 # =========================================================================
 # PART A — Validation post-LLM (déterministe, à mettre dans la CI)
 # =========================================================================
