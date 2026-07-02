@@ -1,4 +1,4 @@
-# Pilotage J4 — Burndown & Burnup
+ # Pilotage J4 — Burndown & Burnup
 
 **Projet :** EduTutor IA — Équipe 22  
 **Date :** Jeudi 2 juillet 2026 (perturbation P5 — Livraison / Crise)  
