@@ -1,5 +1,5 @@
 STORY MAP — EDUTUTOR IA
-(Version finale alignée avec le Product Backlog)
+(Version finale)
  
 ==================================================
 ACTIVITÉS UTILISATEUR (Backbone)
