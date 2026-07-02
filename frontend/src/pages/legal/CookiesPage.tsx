@@ -43,15 +43,13 @@ export default function CookiesPage() {
           <h2 className="text-lg font-semibold text-slate-900 mb-1">3. Consentement</h2>
           <p className="text-sm text-slate-700">
             Les cookies strictement nécessaires au fonctionnement du service ne requièrent pas de
-            consentement préalable. Aucun traceur de mesure d’audience non exempté n’est déposé
-            sans accord de l’utilisateur.
+            consentement préalable. Aucun traceur de mesure d’audience non exempté n’est déposé sans
+            accord de l’utilisateur.
           </p>
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold text-slate-900 mb-1">
-            4. Durée de conservation
-          </h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-1">4. Durée de conservation</h2>
           <p className="text-sm text-slate-700">
             Les cookies et éléments de stockage strictement nécessaires sont conservés uniquement
             pendant la durée utile au fonctionnement de la session et à la sécurité du compte.

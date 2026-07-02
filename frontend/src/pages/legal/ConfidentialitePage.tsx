@@ -36,13 +36,11 @@ export default function ConfidentialitePage() {
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold text-slate-900 mb-1">
-            3. Finalités du traitement
-          </h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-1">3. Finalités du traitement</h2>
           <p className="text-sm text-slate-700">
             Les données sont utilisées pour fournir le service, générer des quiz, suivre la
-            progression des utilisateurs, améliorer la qualité des questions, assurer la sécurité
-            de la plateforme et répondre aux obligations légales.
+            progression des utilisateurs, améliorer la qualité des questions, assurer la sécurité de
+            la plateforme et répondre aux obligations légales.
           </p>
           <p className="text-sm text-slate-700 mt-2">
             Aucune donnée n’est utilisée à des fins publicitaires ni revendue à des tiers.
@@ -59,36 +57,31 @@ export default function ConfidentialitePage() {
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold text-slate-900 mb-1">
-            5. Souveraineté des données
-          </h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-1">5. Souveraineté des données</h2>
           <p className="text-sm text-slate-700">
-            Le traitement par IA est effectué localement via Ollama. Aucune donnée personnelle
-            n’est envoyée à un fournisseur de modèle externe et aucun transfert hors Union
-            européenne n’est réalisé.
+            Le traitement par IA est effectué localement via Ollama. Aucune donnée personnelle n’est
+            envoyée à un fournisseur de modèle externe et aucun transfert hors Union européenne
+            n’est réalisé.
           </p>
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold text-slate-900 mb-1">
-            6. Durée de conservation
-          </h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-1">6. Durée de conservation</h2>
           <p className="text-sm text-slate-700">
-            Les données sont conservées uniquement le temps nécessaire à leur finalité.
-            Les comptes, cours, quiz et scores sont conservés tant que le compte est actif.
+            Les données sont conservées uniquement le temps nécessaire à leur finalité. Les comptes,
+            cours, quiz et scores sont conservés tant que le compte est actif.
           </p>
           <p className="text-sm text-slate-700 mt-2">
-            Les journaux d’audit sont conservés 12 mois. Les signalements et demandes RGPD
-            sont conservés 3 ans. À l’expiration des délais, les données sont supprimées ou
-            anonymisées.
+            Les journaux d’audit sont conservés 12 mois. Les signalements et demandes RGPD sont
+            conservés 3 ans. À l’expiration des délais, les données sont supprimées ou anonymisées.
           </p>
         </section>
 
         <section>
           <h2 className="text-lg font-semibold text-slate-900 mb-1">7. Vos droits</h2>
           <p className="text-sm text-slate-700">
-            Conformément au RGPD, vous disposez d’un droit d’accès, de rectification,
-            d’effacement, de limitation et de portabilité de vos données.
+            Conformément au RGPD, vous disposez d’un droit d’accès, de rectification, d’effacement,
+            de limitation et de portabilité de vos données.
           </p>
           <p className="text-sm text-slate-700 mt-2">
             Vous pouvez exercer ces droits depuis votre page profil ou en écrivant à
@@ -99,8 +92,8 @@ export default function ConfidentialitePage() {
         <section>
           <h2 className="text-lg font-semibold text-slate-900 mb-1">8. Cookies</h2>
           <p className="text-sm text-slate-700">
-            Les cookies et technologies de stockage utilisés par EduTutor IA sont détaillés
-            dans la politique de gestion des cookies.
+            Les cookies et technologies de stockage utilisés par EduTutor IA sont détaillés dans la
+            politique de gestion des cookies.
           </p>
         </section>
       </div>

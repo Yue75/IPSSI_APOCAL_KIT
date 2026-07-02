@@ -77,12 +77,8 @@ export default function LegalScaffold({
 
       <p className="text-xs text-slate-400 mt-10 pt-4 border-t border-slate-200">
         Dernière mise à jour :{' '}
-        {isCompleted ? (
-          <time dateTime="2026-07-01">01/07/2026</time>
-        ) : (
-          <em>à compléter</em>
-        )}
-        . Document rédigé dans le cadre pédagogique APOCAL'IPSSI 2026.
+        {isCompleted ? <time dateTime="2026-07-01">01/07/2026</time> : <em>à compléter</em>}.
+        Document rédigé dans le cadre pédagogique APOCAL'IPSSI 2026.
       </p>
     </article>
   );
