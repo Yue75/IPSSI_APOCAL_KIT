@@ -1,114 +1,121 @@
-# Story Map – EduTutor IA (Version finale mise à jour)
-
-## Activité 1 : Gestion du compte
-
-### Must Have (Release 1)
-
-* En tant qu’utilisateur, je veux créer un compte avec mon email afin d’accéder à la plateforme.
-* En tant qu’utilisateur, je veux me connecter afin de retrouver mes quiz.
-* En tant qu’utilisateur, je veux réinitialiser mon mot de passe si je l’oublie.
-* En tant qu’utilisateur, je veux modifier mon profil.
-
----
-
-## Activité 2 : Import du cours
-
-### Must Have (Release 1)
-
-* En tant qu’étudiant, je veux importer un PDF (≤ 5 Mo) afin de créer un quiz depuis mon cours.
-* En tant qu’étudiant, je veux coller un texte (> 200 caractères) afin de générer un quiz.
-* En tant que système, je veux vérifier le format et la taille des fichiers importés.
-
----
-
-## Activité 3 : Génération du quiz IA
-
-### Must Have (Release 1)
-
-* En tant qu’étudiant, je veux générer automatiquement un quiz de 10 QCM.
-* En tant que système, je veux utiliser un LLM local (Ollama / Llama 3.1 8B).
-* En tant que système, je veux générer 4 propositions avec une seule bonne réponse.
-
-### Sécurité ajoutée (J3)
-
-* En tant que système, je veux séparer le System Prompt du User Input afin d’éviter les prompt injections.
-* En tant que système, je veux ignorer toute instruction cachée dans le document importé.
-* En tant que système, je veux valider le JSON généré avant affichage.
-
----
-
-## Activité 4 : Répondre au quiz
-
-### Must Have (Release 1)
-
-* En tant qu’étudiant, je veux répondre aux 10 questions.
-* En tant qu’étudiant, je veux soumettre mes réponses pour correction.
-
----
-
-## Activité 5 : Correction et résultats
-
-### Must Have (Release 1)
-
-* En tant qu’étudiant, je veux voir mon score sur 10.
-* En tant qu’étudiant, je veux identifier mes bonnes et mauvaises réponses.
-* En tant qu’étudiant, je veux revoir mes erreurs afin de progresser.
-
----
-
-## Activité 6 : Historique
-
-### Must Have (Release 1)
-
-* En tant qu’utilisateur, je veux retrouver l’historique de mes quiz.
-* En tant qu’utilisateur, je veux consulter mes anciens scores.
-
----
-
-## Activité 7 : Suivi enseignant (J1)
-
-### Should Have
-
-* En tant qu’enseignante (Mme Lefèvre), je veux consulter les scores de mes 28 étudiants.
-* En tant qu’enseignante, je veux repérer les étudiants en difficulté.
-* En tant qu’enseignante, je veux envoyer des conseils personnalisés aux étudiants en difficulté.
-
----
-
-## Activité 8 : RGPD & conformité (J3-bis)
-
-### Must Have
-
-* En tant qu’utilisateur, je veux exporter mes données personnelles (SAR RGPD).
-* En tant qu’utilisateur, je veux supprimer mon compte et mes données.
-* En tant que système, je veux conserver les données selon la politique de rétention définie.
-
----
-
-## Activité 9 : Accessibilité (nouvelle perturbation)
-
-### Should Have / Release 2
-
-* En tant qu’étudiant malvoyant, je veux utiliser un lecteur d’écran afin d’accéder aux quiz.
-* En tant qu’utilisateur, je veux augmenter la taille du texte pour améliorer la lisibilité.
-* En tant qu’utilisateur, je veux naviguer au clavier sans souris.
-* En tant qu’utilisateur, je veux un mode contraste élevé conforme RGAA.
-
----
-
-## Activité 10 : Internationalisation
-
-### Could Have / Release 2
-
-* En tant qu’étudiant étranger, je veux utiliser la plateforme en anglais.
-* En tant qu’étudiant étranger, je veux utiliser la plateforme en espagnol.
-* En tant qu’utilisateur, je veux générer des quiz dans la langue sélectionnée.
-
----
-
-## Activité 11 : Scalabilité / montée en charge
-
-### Could Have / Release 2
+STORY MAP — EDUTUTOR IA
+(Version finale alignée avec le Product Backlog)
+ 
+==================================================
+ACTIVITÉS UTILISATEUR (Backbone)
+==================================================
+ 
+1. S'inscrire / Se connecter
+ 
+2. Importer un cours
+ 
+3. Générer un quiz
+ 
+4. Passer le quiz
+ 
+5. Consulter les résultats / progression
+ 
+6. Gérer le compte & conformité RGPD
+ 
+7. Accessibilité
+ 
+8. Internationalisation (i18n)
+ 
+9. Performance / Scalabilité
+ 
+ 
+==================================================
+RELEASE 1 — MVP (MUST)
+==================================================
+ 
+1. S'inscrire / Se connecter
+• Créer un compte (US-01)
+• Réinitialiser le mot de passe (US-07)
+ 
+2. Importer un cours
+• Importer un PDF ou un texte (US-02)
+ 
+3. Générer un quiz
+• Générer automatiquement un quiz de 10 QCM (US-03)
+• Protection contre les Prompt Injections (US-24)
+• Validation automatique du quiz généré (US-25)
+• Enseignant : créer et partager un quiz (US-21)
+ 
+4. Passer un quiz
+• Soumettre les réponses (US-04)
+• Correction automatique (US-05)
+• Enseignant : correction automatique des réponses de la classe (US-23)
+ 
+5. Consulter les résultats
+• Historique des quiz (US-06)
+ 
+6. Gérer le compte & RGPD
+• Gestion du compte
+• Suppression du compte (droit à l'oubli) (US-17)
+ 
+7. Accessibilité
+• Navigation uniquement au clavier (US-28)
+• Compatibilité RGAA / lecteurs d'écran (US-29)
+ 
+8. Internationalisation
+• Changer la langue de l'interface (FR / EN) (US-30)
+ 
+9. Performance / Scalabilité
+• Maintenir de bonnes performances sous forte charge (US-32)
+ 
+ 
+==================================================
+RELEASE 2 — SHOULD
+==================================================
+ 
+1. Gestion des contenus
+• Bibliothèque des cours (US-08)
+ 
+2. Quiz avancé
+• Choisir la difficulté et le nombre de questions (US-09)
+• Mode Timer (US-10)
+ 
+3. Résultats avancés
+• Dashboard étudiant (US-11)
+• Dashboard enseignant / résultats de classe (US-22)
+ 
+4. RGPD & Sécurité
+• Export des données personnelles (US-12)
+• Tests adversariaux automatiques (CI) (US-26)
+• Journal d'audit RGPD (US-27)
+ 
+5. Internationalisation
+• L'IA répond dans la langue sélectionnée (US-31)
+ 
+6. Performance
+• Mise en cache (US-33)
+• Tests de charge (US-34)
+ 
+ 
+==================================================
+RELEASE 3 — COULD
+==================================================
+ 
+• Connexion Google / Apple OAuth (US-13)
+ 
+• Importer un cours depuis une URL Web (US-14)
+ 
+• Générer des questions ouvertes corrigées par IA (US-15)
+ 
+• Détection automatique des lacunes (US-16)
+ 
+• Fournisseur LLM de secours (US-35)
+ 
+ 
+==================================================
+WON'T (HORS PÉRIMÈTRE)
+==================================================
+ 
+• SSO établissement (US-18)
+ 
+• Chatbot IA conversationnel (US-19)
+ 
+• Mode compétition entre étudiants (US-20
 
 * En tant qu’administrateur, je veux supporter plusieurs milliers d’utilisateurs simultanés.
 * En tant que système, je veux mettre les requêtes LLM en file d’attente afin d’éviter la surcharge.
