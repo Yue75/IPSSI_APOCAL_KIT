@@ -2,55 +2,90 @@
 
 ## 1. Vision
 
-Permettre aux étudiants du supérieur de transformer leurs propres cours en entraînement actif, personnalisé et souverain, afin de réviser plus efficacement sans exposer leurs données.
+Faire d'EduTutor IA la plateforme de revision intelligente de reference pour les lyceens en France, accessible a tous, capable d'accompagner chaque eleve dans sa langue et suffisamment robuste pour supporter un usage national.
+
+La vision produit evolue donc d'un MVP de revision individuelle vers un service public de fait : fiable, inclusif, conforme RGAA, souverain sur les donnees pedagogiques et pret a s'internationaliser.
 
 ## 2. Cible (Target Group)
 
-La cible principale est l'étudiant du supérieur en France, notamment en BTS, Licence ou Master, qui prépare des contrôles, partiels ou certifications à partir de supports de cours souvent denses : PDF, polycopiés, notes personnelles ou textes fournis par les enseignants.
+La cible principale devient le lyceen en France, de la seconde a la terminale, qui revise des cours, controles continus, epreuves de specialite ou examens nationaux a partir de supports fournis par ses enseignants ou son etablissement.
 
-Ses caractéristiques clés :
+Ses caracteristiques cles :
 
-- Il manque de temps pour créer lui-même des questionnaires pertinents.
-- Il révise souvent de manière passive, par relecture, sans mesurer réellement sa maîtrise.
-- Il cherche un outil simple, rapide et directement aligné sur ses propres cours.
-- Il est sensible à la gratuité ou au faible coût d'usage.
-- Il peut être attentif à la confidentialité de ses documents, surtout lorsque les supports contiennent des contenus pédagogiques internes.
+- Il revise souvent sous contrainte de temps, avec des niveaux d'autonomie tres variables.
+- Il a besoin d'un outil simple, rassurant et directement aligne sur les programmes et supports etudies.
+- Il peut etre en situation de handicap temporaire ou durable : handicap visuel, moteur, cognitif, auditif, trouble dys, fatigue attentionnelle.
+- Il peut utiliser le service depuis un ordinateur familial, un smartphone ou un poste d'etablissement.
+- Il doit pouvoir comprendre l'interface et les reponses de l'IA, y compris dans un contexte d'apprentissage multilingue.
 
-Une cible secondaire émerge autour des enseignants et établissements, qui peuvent prescrire ou adopter la solution si elle garantit une qualité pédagogique suffisante et une conformité RGPD solide.
+Les cibles secondaires deviennent structurantes :
+
+- Enseignants, qui veulent proposer des exercices fiables sans perdre le controle pedagogique.
+- Etablissements scolaires, qui attendent securite, administration, supervision et continuite de service.
+- Ministere, rectorats et collectivites, qui imposent accessibilite RGAA, conformite, resilience et pilotage.
+- Familles, qui cherchent un accompagnement utile, comprehensible et equitable pour leurs enfants.
 
 ## 3. Besoins (Needs)
 
-Les utilisateurs ont besoin de passer rapidement d'un support de cours à une situation d'auto-évaluation concrète. Le produit répond aux besoins suivants :
+Les utilisateurs ont besoin de passer rapidement d'un support de cours a une situation d'auto-evaluation concrete, sans exclure aucun eleve et sans faire porter la complexite technique aux etablissements.
 
-- Gagner du temps en évitant la création manuelle de QCM.
-- Obtenir des questions alignées sur le contenu réellement étudié, et non sur une banque générique.
-- Se tester activement pour mieux mémoriser et identifier ses lacunes.
-- Comprendre ses erreurs grâce au score et au détail des réponses.
-- Suivre sa progression dans le temps via l'historique des quiz.
-- Réviser avec confiance, sans transfert automatique des cours vers des services d'IA tiers.
+Besoins eleves :
+
+- Generer des quiz et explications a partir des cours reellement etudies.
+- Comprendre ses erreurs avec des corrections claires, progressives et adaptees a son niveau.
+- Utiliser l'application au clavier, avec lecteur d'ecran, contrastes suffisants, textes lisibles et navigation previsible.
+- Changer de langue d'interface et obtenir des reponses IA dans la langue de l'eleve, a la volee.
+- Retrouver son historique et suivre ses progres sans friction.
+
+Besoins enseignants et etablissements :
+
+- Garder une confiance pedagogique dans les contenus generes.
+- S'assurer que les donnees des eleves et supports de cours sont protegees.
+- Disposer d'une plateforme stable lors des pics d'usage, notamment avant les examens.
+- Piloter les risques : accessibilite, conformite, qualite IA, couts d'inference, dependance fournisseur.
 
 ## 4. Produit (Product)
 
-EduTutor IA est une plateforme web de révision personnalisée qui génère des quiz QCM à partir des supports de cours déposés par l'utilisateur.
+EduTutor IA est une plateforme web de revision personnalisee, accessible et multilingue, qui transforme les supports de cours en exercices interactifs et explications adaptees.
 
-Les éléments qui définissent son identité :
+Les elements qui definissent son identite cible :
 
-- Dépôt de cours par fichier PDF ou texte brut.
-- Génération automatique d'un quiz de 10 QCM à 4 réponses via un LLM.
-- Passage du quiz, correction automatique, score sur 10 et détail question par question.
-- Historique des quiz pour suivre les résultats et la progression.
-- IA locale par défaut avec Ollama / Llama 3.1 8B, afin de limiter les transferts de données et maîtriser les coûts.
-- Architecture multi-fournisseurs permettant d'activer d'autres modèles IA si le contexte produit ou technique l'exige.
+- Depot ou selection de supports de cours : PDF, texte brut, contenus enseignants ou ressources d'etablissement.
+- Generation automatique de quiz, corrections et explications par IA.
+- Historique de revision, progression et reprise des activites.
+- Interface conforme RGAA : structure semantique, alternatives textuelles, contrastes, navigation clavier, messages d'erreur explicites, compatibilite lecteur d'ecran.
+- Internationalisation de l'interface : separation des libelles, formats locaux, langue utilisateur et contenus traduisibles.
+- IA multilingue : detection ou selection de langue, generation de questions et explications dans la langue de l'eleve, avec garde-fous pedagogiques.
+- Architecture IA multi-fournisseurs : modele local par defaut lorsque possible, bascule controlee vers fournisseurs cloud selon charge, langue, qualite ou disponibilite.
+- Architecture scalable et resiliente : files de traitement, services decouples, cache, observabilite, degradation controlee en cas de pic.
 
 ## 5. Objectifs business (Business Goals)
 
-L'organisation cherche à valider une proposition de valeur edtech différenciante : une solution de révision IA à la fois utile, pédagogique, conforme et économiquement maîtrisée.
+L'organisation cherche a transformer un succes d'usage soudain en plateforme nationale credible, contractualisable et extensible a l'international.
 
 Objectifs principaux :
 
-- Démontrer la faisabilité d'un MVP couvrant le parcours complet : inscription, dépôt de cours, génération, passage du quiz, score et historique.
-- Se différencier des solutions IA cloud généralistes par le traitement local, la souveraineté des données et l'ancrage pédagogique francophone.
-- Réduire les coûts d'inférence grâce à l'usage d'un modèle local par défaut.
-- Construire une base produit crédible pour une future offre freemium, premium IA cloud ou B2B établissements.
-- Renforcer la confiance auprès des étudiants, enseignants et établissements grâce à une approche RGPD by design.
-- Poser les fondations d'une plateforme d'apprentissage adaptatif évolutive, au-delà du simple générateur de QCM.
+- Obtenir l'eligibilite a un deploiement dans les lycees en respectant les exigences RGAA et RGPD.
+- Stabiliser la plateforme pour absorber les pics de connexion massifs lies aux revisions nationales.
+- Construire une trajectoire d'internationalisation : langues d'interface, langues de reponse IA, adaptation progressive aux contextes pedagogiques locaux.
+- Maintenir une differenciation par la souverainete, la confiance pedagogique et la maitrise des couts IA.
+- Soutenir la levee de fonds par des artefacts a jour : vision produit, risques, priorisation, feuille de route et indicateurs de pilotage.
+- Passer d'une logique MVP a une logique plateforme : maintenable, observable, testable et exploitable par des partenaires publics ou prives.
+
+Indicateurs de pilotage proposes :
+
+- Taux de conformite RGAA par parcours critique.
+- Disponibilite de service et temps de reponse en periode de pic.
+- Taux de generation IA reussie par langue.
+- Cout moyen d'inference par quiz et par utilisateur actif.
+- Taux de completion des quiz et progression moyenne des scores.
+- Nombre d'incidents critiques lies a l'accessibilite, la securite ou la qualite IA.
+
+Risques majeurs identifies :
+
+- Non-conformite RGAA bloquant l'adoption par l'Etat.
+- Saturation technique lors des pics d'usage televisuels ou pre-examens.
+- Reponses IA incorrectes, mal traduites ou inadaptees au niveau scolaire.
+- Derive des couts si le recours aux modeles cloud devient non maitrise.
+- Complexite d'internationalisation sous-estimee : interface, contenus, prompts, evaluation qualite.
+- Perte de confiance si la gouvernance des donnees eleves et supports pedagogiques n'est pas explicite.
